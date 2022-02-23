@@ -1,0 +1,12 @@
+#redis
+spring:
+  redis:
+    #redis机器ip
+    host: 101.35.87.195
+    #redis端口
+    port: 6379
+    #redis密码
+    password: qwe11011.
+    #redis超时时间（毫秒），如果不设置，取默认值2000
+    timeout: 10000
+
