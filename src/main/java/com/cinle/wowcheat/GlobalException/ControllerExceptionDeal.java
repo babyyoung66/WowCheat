@@ -87,6 +87,16 @@ public class ControllerExceptionDeal {
     public AjaxResponse SQLSyntaxError(Exception e){
         e.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
-        return ajaxResponse.error().setMessage("SQL语句错误，请联系管理员！");
+        return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
+    }
+
+    /**
+     *
+     * */
+    @ExceptionHandler({java.sql.SQLException.class})
+    public AjaxResponse SQLException(Exception e){
+        e.printStackTrace();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
     }
 }

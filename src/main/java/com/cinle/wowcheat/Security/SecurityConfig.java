@@ -11,11 +11,15 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -38,14 +42,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/register/*","/auth/login").permitAll()
+                .antMatchers("/register/*", "/auth/*").permitAll()
                 //放行swagger
-                .antMatchers("/swagger-ui.html","/swagger-resources/**","/webjars/**","/v2/**","/api/**","/swagger-ui/*").permitAll()
+                .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/swagger-ui/*").permitAll()
                 .anyRequest().authenticated()
-               // .access("@checkRoles.hasPermission(request,authentication)")
+                // .access("@checkRoles.hasPermission(request,authentication)")
                 .and()
                 .exceptionHandling()
-                //.authenticationEntryPoint() //未登录处理
+                .authenticationEntryPoint(new CustomerAuthenticationEntryPoint()) //未登录处理
                 .accessDeniedHandler(accessDeniedHandler) //未授权、权限不对应
                 .and()
                 .rememberMe()
@@ -54,38 +58,44 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .cors(Customizer.withDefaults())//Customizer.withDefaults(),前后端分离JSON登录必须加该内容
                 .csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+
+
+        ;
+        http.addFilterAt(CustomerUsernamePasswordFilter(), UsernamePasswordAuthenticationFilter.class); /*自定义获取JSON账号密码方法*/
+        // http.addFilterAt(rememberMeAuthenticationFilter(),RememberMeAuthenticationFilter.class); /*自定义获取remember方法*/
+        http.sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .sessionFixation()  /** 与下面的默认开启，每次重新登录会生成新的session，把原来session的信息复制到新的*/
                 .migrateSession()
                 .maximumSessions(1)/** 设置账号只允许一个地方登录*/
                 .maxSessionsPreventsLogin(false)
-            /** true时先登录的可以操作,其他地方登录时被拒绝，
-            false时则后续登录会把先登录的踢下线 */
+                /** true时先登录的可以操作,其他地方登录时被拒绝，
+                 false时则后续登录会把先登录的踢下线 */
                 .expiredSessionStrategy(new CustomExpiredSessionStrategy())//对超时session或者挤下线时做出反馈处理,使用的是自定义类
 
-
         ;
-                http.addFilterAt(CustomerUsernamePasswordFilter(), UsernamePasswordAuthenticationFilter.class); /*自定义获取JSON账号密码方法*/
-                http.addFilterAt(rememberMeAuthenticationFilter(),RememberMeAuthenticationFilter.class); /*自定义获取remember方法*/
 
-
+                /*退出相关*/
+        http.logout()
+                .logoutUrl("/auth/logout")
+                .logoutSuccessHandler(new CustomerLogoutSuccessHandler())
+        ;
 
     }
 
     /**
      * sessionManagement()相关的设置无效时，需要引入该bean
-     * */
-/*
+     */
     @Bean
     HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }
+
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
     }
-*/
+
 
     //身份认证
     //spring5.0+需要密码加密才可以认证，所有数据库加入数据时需对密码加密
@@ -99,13 +109,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //放行静态资源
-        web.ignoring().antMatchers("classpath:/css/**","static/**");
+        web.ignoring().antMatchers("classpath:/css/**", "static/**");
     }
 
     /**
      * 重写获取登录信息的方法
      * 使之支持JSON登录
-     * */
+     */
     @Bean
     public CustomerUsernamePasswordFilter CustomerUsernamePasswordFilter() throws Exception {
         CustomerUsernamePasswordFilter filter = new CustomerUsernamePasswordFilter();
@@ -120,14 +130,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //这里设置自带的AuthenticationManager，否则要自己写一个
         filter.setAuthenticationManager(super.authenticationManager());
         //加入自定义获取remember的方法
-
+        filter.setRememberMeServices(CustomerRememberMeServices());
         return filter;
     }
 
 
     /**
-     * @return
-     * 注入自定义的判断Rememberme的方法
+     * @return 注入自定义的判断Rememberme的方法
      */
     @Bean
     public CustomerRememberMeServices CustomerRememberMeServices() {
@@ -147,18 +156,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-
-
     /**
-     使用Security提供的默认方法将token持久化到数据库，在数据库创建persistent_logins表，
-     表结构在
-     @JdbcTokenRepositoryImpl 类中的静态常量 CREATE_TABLE_SQL，即
-     create table persistent_logins (username varchar(64) not null,
-     series varchar(64) primary key,token varchar(64) not null,
-     last_used timestamp not null)
+     * 使用Security提供的默认方法将token持久化到数据库，在数据库创建persistent_logins表，
+     * 表结构在
+     * @see JdbcTokenRepositoryImpl
+     * 类中的静态常量 CREATE_TABLE_SQL，即
+     * create table persistent_logins (username varchar(64) not null,
+     * series varchar(64) primary key,token varchar(64) not null,
+     * last_used timestamp not null)
      **/
     @Resource
-    private DataSource dataSource ;
+    private DataSource dataSource;
+
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
 
@@ -167,4 +176,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return tokenRepository;
     }
 
-    }
+}

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -24,7 +26,7 @@ import java.io.IOException;
 public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     //spring自带的json生成
     private static ObjectMapper objectMapper = new ObjectMapper();
-
+    private final Logger log = LoggerFactory.getLogger(LoginSuccessHandler.class);
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -39,7 +41,7 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
             response.getWriter().write(objectMapper.writeValueAsString(ajaxResponse.success().setMessage("登录成功!").setData(user)));
             response.getWriter().flush();
             response.getWriter().close();
-
+            log.info("用户uuid:{} 已从主机 {}:{} 登录服务......",userDetail.getUuid(),request.getRemoteHost(),request.getRemotePort());
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
         }

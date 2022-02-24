@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -50,10 +52,12 @@ public class RegisterController {
      */
     @ApiOperation(value = "提交注册信息",notes = "")
     @PostMapping("/")
-    public AjaxResponse userRegister(@RequestBody @Valid MyUserDetail user) {
+    public AjaxResponse userRegister(@RequestBody @Valid MyUserDetail user, HttpServletRequest request) {
+
         AjaxResponse ajaxResponse = new AjaxResponse();
         List<MyUserDetail> list =  userServices.selectByWowIdOrEmail(user);
-        if (list != null || !list.isEmpty()){
+        System.out.println();
+        if (!list.isEmpty() ||list.size()>0){
             return ajaxResponse.error().setMessage("id或邮箱已被注册!");
         }
         /* 邮箱验证，验证通过则放行*/
@@ -76,11 +80,11 @@ public class RegisterController {
         if (email == null || StrUtil.hasBlank(email)) {
             return ajaxResponse.error().setMessage("请输入邮箱!");
         }
-        int success =  mailServices.SendVerifyMail(user.getEmail());
-        if (success == 1){
-            return ajaxResponse.success().setMessage("邮件已发送,请注意查收!");
+        long time =  mailServices.SendVerifyMail(user.getEmail());
+        if (time == 0){
+            return ajaxResponse.success().setMessage("邮件已发送，请注意查收!");
         }
-        return ajaxResponse.error().setMessage("验证码5分钟内有效,如未收到请1分钟后再尝试!");
+        return ajaxResponse.error().setMessage("验证码5分钟内有效，如未收到请"+ time +"秒后再尝试!");
     }
 
     /**检查邮箱验证码
@@ -92,9 +96,9 @@ public class RegisterController {
     public AjaxResponse checkEmailCode(@RequestBody @Valid RegisterVo user){
         AjaxResponse ajaxResponse = new AjaxResponse();
         /* 从redis获取并验证 */
-        boolean success = verifyUtils.checkEmailCode(user.getEmail(),user.getCode());
-        if (success){
-            return ajaxResponse.success().setMessage("验证成功,请在5分钟内完成注册!");
+        String success = verifyUtils.checkEmailCode(user.getEmail(),user.getCode());
+        if (success != null && !success.isEmpty()){
+            return ajaxResponse.success().setMessage(success);
         }
         return ajaxResponse.error().setMessage("验证码错误!");
     }

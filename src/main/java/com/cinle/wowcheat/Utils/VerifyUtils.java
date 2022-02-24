@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Utils;
 
+import com.cinle.wowcheat.Constants.MyContans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,18 +37,26 @@ public class VerifyUtils {
     /**
      * @param email 注册邮箱
      * @param code  验证码
-     * @return
+     * @return 返回校验情况，空则校验失败
      */
-    public boolean checkEmailCode(String email, String code) {
+    public String checkEmailCode(String email, String code) {
         String key = KEY_HEAD + email;
+        String successStatus = code + "#true";
         String co = (String) redisTemplate.opsForValue().get(key);
         if (co != null && co.equals(code)) {
             /*返回true 并将redis状态改为true，保存5分钟*/
-            redisTemplate.opsForValue().set(key, "true", 300, TimeUnit.SECONDS);
-            log.info("验证成功，将Redis中邮箱验证码key:{}的状态设置为true", key );
-            return true;
+            redisTemplate.opsForValue().set(key, successStatus, MyContans.CODE_KEEPALIVE_TIME, TimeUnit.SECONDS);
+            log.info("验证成功，将Redis中邮箱验证码key:{}的状态设置为:{}", key ,code+"#true");
+            return "验证成功，请在5分钟内完成注册!";
         }
-        return false;
+        //第二种情况，已经验证，但是前端又使用相同验证码和同一邮箱验证
+        if (co != null && co.equals(successStatus))
+        {
+            long ttl = getEmailCodeTTL(email);
+            String message = "验证码已被使用，请在"+ ttl +"秒内完成注册!";
+            return message;
+        }
+        return null;
     }
 
     /**
@@ -58,7 +67,7 @@ public class VerifyUtils {
     public boolean isEmailCheckSuccess(String email) {
         String key = KEY_HEAD + email;
         String status = (String) redisTemplate.opsForValue().get(key);
-        if (status != null && status.equals("true")) {
+        if (status != null && status.contains("true")) {
             return true;
         }
         return false;

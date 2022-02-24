@@ -35,8 +35,8 @@ public class Role implements Serializable {
         return role;
     }
 
-    public void setRole(Integer role) {
-        this.role = role;
+    public void setRole(Integer Role) {
+        this.role = Role;
     }
 
     @Override

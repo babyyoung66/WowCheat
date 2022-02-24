@@ -33,7 +33,9 @@
   <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.MyUserDetail" useGeneratedKeys="true">
     insert into wow_userdetail
     <trim prefix="(" suffix=")" suffixOverrides=",">
-
+      <if test="uuid != null">
+        uuid,
+      </if>
       <if test="wowId != null">
         wow_id,
       </if>
@@ -60,6 +62,9 @@
       </if>
       <if test="address != null">
         address,
+      </if>
+      <if test="creattime != null">
+        creatTime,
       </if>
       <if test="status != null">
         `status`,

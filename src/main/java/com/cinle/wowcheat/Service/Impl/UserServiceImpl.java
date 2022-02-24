@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserServices {
         LocalDateTime dateTime = LocalDateTime.now();
         record.setCreattime(dateTime);
         record.setUuid(uuid);
+        System.out.println(record);
         return userdetailDao.insertSelective(record);
     }
 
