@@ -5,7 +5,7 @@ import com.cinle.wowcheat.GlobalException.ControllerExceptionDeal;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.SendMailServices;
 import com.cinle.wowcheat.Service.UserServices;
-import com.cinle.wowcheat.Utils.VerifyUtils;
+import com.cinle.wowcheat.Service.VerifyService;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import com.cinle.wowcheat.Vo.RegisterVo;
 import io.swagger.annotations.Api;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -41,7 +40,7 @@ public class RegisterController {
     SendMailServices mailServices;
 
     @Autowired
-    VerifyUtils verifyUtils;
+    VerifyService verifyService;
 
 
 
@@ -61,7 +60,7 @@ public class RegisterController {
             return ajaxResponse.error().setMessage("id或邮箱已被注册!");
         }
         /* 邮箱验证，验证通过则放行*/
-        if (verifyUtils.isEmailCheckSuccess(user.getEmail())){
+        if (verifyService.isEmailCheckSuccess(user.getEmail())){
             userServices.insertSelective(user);
             return ajaxResponse.success().setMessage("注册成功!");
         }
@@ -96,7 +95,7 @@ public class RegisterController {
     public AjaxResponse checkEmailCode(@RequestBody @Valid RegisterVo user){
         AjaxResponse ajaxResponse = new AjaxResponse();
         /* 从redis获取并验证 */
-        String success = verifyUtils.checkEmailCode(user.getEmail(),user.getCode());
+        String success = verifyService.checkEmailCode(user.getEmail(),user.getCode());
         if (success != null && !success.isEmpty()){
             return ajaxResponse.success().setMessage(success);
         }

@@ -21,9 +21,13 @@ public class CustomerUserDetails extends MyUserDetail implements UserDetails {
      * security字段，直接继承实现，防止污染数据库实体类
      * */
 
+    @JSONField(serialize=false)
     boolean accountNonExpired;//是否没过期
+    @JSONField(serialize=false)
     boolean accountNonLocked;//是否没被锁定
+    @JSONField(serialize=false)
     boolean credentialsNonExpired;//是否没过期
+    @JSONField(serialize=false)
     boolean enabled;//账号是否可用
 
     @JSONField(serialize=false)

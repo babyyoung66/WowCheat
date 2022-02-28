@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Service.Impl;
 
+import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cinle.wowcheat.Dao.UserdetailDao;
 import com.cinle.wowcheat.Model.MyUserDetail;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +30,6 @@ public class UserServiceImpl implements UserServices {
         return userdetailDao.deleteByUUID(uuid);
     }
 
-
     @Override
     public int insertSelective(MyUserDetail record) {
         BCryptPasswordEncoder bcry = new BCryptPasswordEncoder();
@@ -39,7 +40,6 @@ public class UserServiceImpl implements UserServices {
         LocalDateTime dateTime = LocalDateTime.now();
         record.setCreattime(dateTime);
         record.setUuid(uuid);
-        System.out.println(record);
         return userdetailDao.insertSelective(record);
     }
 
@@ -54,7 +54,6 @@ public class UserServiceImpl implements UserServices {
     }
 
 
-
     @Override
     public CustomerUserDetails findForLogin(String wowId) {
         return userdetailDao.findForLogin(wowId);
@@ -63,5 +62,40 @@ public class UserServiceImpl implements UserServices {
     @Override
     public List<MyUserDetail> selectByWowIdOrEmail(MyUserDetail record) {
         return userdetailDao.selectByWowIdOrEmail(record);
+    }
+
+    @Override
+    public List<MyUserDetail> selectByFriendsUuidList(List<String> uuidList, String sUuid) {
+        //脱敏工作
+        List<MyUserDetail> users = userdetailDao.selectByFriendsUuidList(uuidList, sUuid);
+        List<MyUserDetail> list = new ArrayList<>();
+        if (users != null && !users.isEmpty()) {
+            users.forEach(u -> {
+                u.setEmail(DesensitizedUtil.email(u.getEmail()));
+                u.setPhonenum(DesensitizedUtil.mobilePhone(u.getPhonenum()));
+                list.add(u);
+            });
+        }
+        return list;
+    }
+
+    @Override
+    public MyUserDetail selectByUUID(String uuid) {
+        MyUserDetail usr = userdetailDao.selectByUUID(uuid);
+        if (usr != null) {
+            usr.setEmail(DesensitizedUtil.email(usr.getEmail()));
+            usr.setPhonenum(DesensitizedUtil.mobilePhone(usr.getPhonenum()));
+        }
+        return usr;
+    }
+
+    @Override
+    public MyUserDetail selectByWowId(String wowId) {
+        MyUserDetail usr = userdetailDao.selectByWowId(wowId);
+        if (usr != null) {
+            usr.setPhonenum(DesensitizedUtil.mobilePhone(usr.getPhonenum()));
+            usr.setEmail(DesensitizedUtil.email(usr.getEmail()));
+        }
+        return usr;
     }
 }

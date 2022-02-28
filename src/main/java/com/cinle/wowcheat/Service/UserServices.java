@@ -2,6 +2,7 @@ package com.cinle.wowcheat.Service;
 
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Security.CustomerUserDetails;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -24,4 +25,10 @@ public interface UserServices {
      * @return 返回一个用户列表
      */
     List<MyUserDetail> selectByWowIdOrEmail(MyUserDetail record);
+
+    List<MyUserDetail> selectByFriendsUuidList(List<String> uuidList , String sUuid);
+
+    MyUserDetail selectByUUID(String uuid);
+
+    MyUserDetail selectByWowId( String wowId);
 }

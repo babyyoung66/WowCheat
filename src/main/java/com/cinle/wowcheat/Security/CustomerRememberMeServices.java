@@ -30,6 +30,8 @@ public class CustomerRememberMeServices extends PersistentTokenBasedRememberMeSe
             Boolean rememberMe =(Boolean) request.getAttribute("rememberMe");
             if(rememberMe){
                 return true;
+            }else {
+                return false;
             }
         }
         //否则调用原本的自我记住功能

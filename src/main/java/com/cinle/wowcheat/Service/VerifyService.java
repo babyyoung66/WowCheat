@@ -1,4 +1,4 @@
-package com.cinle.wowcheat.Utils;
+package com.cinle.wowcheat.Service;
 
 import com.cinle.wowcheat.Constants.MyContans;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @Time 2022/2/21 16:31
  */
 @Component
-public class VerifyUtils {
+public class VerifyService {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -23,7 +23,7 @@ public class VerifyUtils {
     private final String KEY_HEAD = "VerifyCode:";
 
 
-    private final Logger log = LoggerFactory.getLogger(VerifyUtils.class);
+    private final Logger log = LoggerFactory.getLogger(VerifyService.class);
 
     public boolean setEmailCode(String email, String code) {
         String key = KEY_HEAD + email;

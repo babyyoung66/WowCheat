@@ -4,7 +4,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.cinle.wowcheat.Constants.MyContans;
 import com.cinle.wowcheat.Enum.MailTypeEnum;
 import com.cinle.wowcheat.Event.SendMailEvent;
-import com.cinle.wowcheat.Utils.VerifyUtils;
 import com.cinle.wowcheat.Vo.MailMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -22,7 +21,7 @@ public class SendMailServices {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private VerifyUtils verifyUtils;
+    private VerifyService verifyService;
 
     public void sendMail(String to, String subject, String content, MailTypeEnum type){
         MailMessage mailMessage = new MailMessage();
@@ -38,10 +37,10 @@ public class SendMailServices {
      */
     public long SendVerifyMail(String to){
         String code = RandomUtil.randomNumbers(MyContans.EMAIL_CODE_LENGTH);
-        long time = verifyUtils.getEmailCodeTTL(to);
+        long time = verifyService.getEmailCodeTTL(to);
          long timer = MyContans.CODE_KEEPALIVE_TIME - MyContans.EMAIL_CODE_WAIT_TIME;
         if (time < timer || time <= 0){
-            verifyUtils.setEmailCode(to,code);
+            verifyService.setEmailCode(to,code);
             MailMessage mailMessage = new MailMessage();
             mailMessage.setTo(to).setSubject("WowCheat").setContent("感谢您的注册!以下是您的验证码:" + code + "(有效期5分钟)。");
             ApplicationEvent event = new SendMailEvent(mailMessage);

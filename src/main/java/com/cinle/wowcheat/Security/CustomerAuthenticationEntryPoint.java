@@ -26,7 +26,7 @@ public class CustomerAuthenticationEntryPoint implements AuthenticationEntryPoin
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(401);
         response.setContentType("application/json;charset=UTF-8");
-        AjaxResponse ajaxResponse = new AjaxResponse().error().setMessage("不允许匿名访问，请先登录系统！");
+        AjaxResponse ajaxResponse = new AjaxResponse().error().setMessage("不允许匿名访问，请先登录系统！").setCode(401);
         PrintWriter out = response.getWriter();
         out.write(JSON.toJSONString(ajaxResponse));
         out.flush();

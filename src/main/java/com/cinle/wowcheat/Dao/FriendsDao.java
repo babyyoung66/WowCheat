@@ -1,0 +1,26 @@
+package com.cinle.wowcheat.Dao;
+
+import com.cinle.wowcheat.Model.Friends;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+@Mapper
+@Component
+public interface FriendsDao {
+    int deleteByUuid(@Param("s_uuid")String sUuid ,@Param("f_uuid") String fUuid);
+
+    int insertSelective(Friends record);
+
+    int insertByUuid(@Param("sUuid") String sUuid , @Param("fUuid") String fUuid);
+
+    Friends selectByPrimaryKey(Integer autoId);
+
+    int updateStatusByUuid(Friends record);
+
+    List<String> selectFriendUuidList(String sUuid);
+
+    Friends findFriend(@Param("s_uuid")String sUuid ,@Param("f_uuid") String fUuid);
+
+}
