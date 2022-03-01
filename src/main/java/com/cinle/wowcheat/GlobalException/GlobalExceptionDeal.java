@@ -1,8 +1,10 @@
 package com.cinle.wowcheat.GlobalException;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,7 +25,7 @@ import java.util.Set;
  * RestControllerAdvice 传入对应的注解类
  */
 @RestControllerAdvice(annotations = {RestController.class, Controller.class})
-public class ControllerExceptionDeal {
+public class GlobalExceptionDeal {
 
 
 
@@ -98,5 +100,26 @@ public class ControllerExceptionDeal {
         e.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
+    }
+
+    /**
+     * jwt解析错误
+     */
+    @ExceptionHandler({JWTVerificationException.class})
+    public AjaxResponse JWTVerificationException(Exception e ){
+        e.printStackTrace();
+        AjaxResponse ajaxResponse =new AjaxResponse();
+        return ajaxResponse.error().setMessage("token解析错误，请尝试重新登录！");
+    }
+
+
+    /**
+     * Redis连接异常
+     */
+    @ExceptionHandler({RedisConnectionFailureException.class})
+    public AjaxResponse RedisConnectionFailureException(Exception e){
+        e.printStackTrace();
+        AjaxResponse ajaxResponse =new AjaxResponse();
+        return ajaxResponse.error().setMessage("服务器Redis缓存连接失败！");
     }
 }

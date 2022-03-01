@@ -1,4 +1,4 @@
-package com.cinle.wowcheat.Event;
+package com.cinle.wowcheat.Tools;
 
 import com.cinle.wowcheat.Vo.MailMessage;
 import org.slf4j.Logger;
@@ -19,8 +19,8 @@ import javax.mail.internet.MimeMessage;
  * @Time 2022/2/16 10:11
  */
 @Component
-public class SendMailComponent {
-    private final Logger logger = LoggerFactory.getLogger(SendMailComponent.class);
+public class SendMailUtils {
+    private final Logger logger = LoggerFactory.getLogger(SendMailUtils.class);
 
 
     /**

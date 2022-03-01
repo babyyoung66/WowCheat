@@ -2,6 +2,7 @@ package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Enum.RoleEnum;
+import com.cinle.wowcheat.Service.JwtTokenService;
 import com.cinle.wowcheat.Service.RoleServices;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,8 +31,7 @@ import java.util.Map;
  */
 public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
 
-    private RoleServices roleServices;
-    private  JwtTokenService jwtTokenService;
+    private JwtTokenService jwtTokenService;
 
     public TokenAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
@@ -38,13 +39,10 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
 
 
     /**
-     * 使用set方法传入查询role的service
-     *
-     * @param Service
+     * @param
      * @return
      */
-    public TokenAuthenticationFilter setService(RoleServices Service,JwtTokenService TokenService) {
-        this.roleServices = Service;
+    public TokenAuthenticationFilter setService(JwtTokenService TokenService) {
         this.jwtTokenService = TokenService;
         return this;
     }
@@ -77,8 +75,9 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         // System.out.println("authenticationToken = " + authenticationToken);
         if (authenticationToken != null) {
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            chain.doFilter(request, response);
         } else {
-
+            return;
             /** 为空时
              * 交给security的过滤链处理，不然就自己校验URL
              * 由 FilterSecurityInterceptor 最后决定是否通过
@@ -94,7 +93,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             return;*/
         }
 
-        chain.doFilter(request, response);
         //super.doFilterInternal(request, response, chain);
     }
 
@@ -107,21 +105,33 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             token = request.getParameter("token");
         }
 
-        /*后续加一层redis验证，用于强制重新登录更新token*/
-
         if (StringUtils.hasText(token)) {
-            //校验合法性
-            Map info = jwtTokenService.getUserInfoFromToken(token);
             boolean isExpires = jwtTokenService.isTokenExpires(token);
-            if (info == null || info.isEmpty() || isExpires) {
-                response.setStatus(403);
-                ajaxResponse.error().setMessage("Token失效！").setCode(403);
+            if (isExpires){
+                response.setStatus(401);
+                ajaxResponse.error().setMessage("Token已过期，请重新登录！").setCode(403);
                 PrintWriter out = response.getWriter();
                 out.println(JSON.toJSONString(ajaxResponse));
                 out.flush();
                 out.close();
                 return null;
             }
+
+            //校验合法性
+            Map info = jwtTokenService.getUserInfoFromToken(token);
+            String uuid = (String) info.get("uuid");
+            System.out.println("uuid = " + uuid);
+            boolean isOnRedis = jwtTokenService.CheckTokenByRedis(uuid,token);
+            if (!isOnRedis || info.isEmpty()) {
+                response.setStatus(401);
+                ajaxResponse.error().setMessage("Token失效，请重新登录！").setCode(403);
+                PrintWriter out = response.getWriter();
+                out.println(JSON.toJSONString(ajaxResponse));
+                out.flush();
+                out.close();
+                return null;
+            }
+
             //是否需要刷新token
             String newToken = jwtTokenService.isNeedFlushToken(token);
             if (StringUtils.hasText(newToken)) {
@@ -130,10 +140,9 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
                 token = newToken;
             }
 
-            String username = (String) info.get("username");
             List<String> roles = (List) info.get("role");
-            if (StringUtils.hasText(username)) {
-                //List<Role> r = roleServices.selectByUseruid(username); //关闭session后每次都会查询MySQL，已弃用
+            if (StringUtils.hasText(uuid)) {
+                //List<Role> r = roleServices.selectByUseruid(uuid); //关闭session后每次都会查询MySQL，已弃用
                 Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 if (roles == null || roles.isEmpty()) {
                     authorities.add(new SimpleGrantedAuthority(RoleEnum.NORMAL.getName()));
@@ -142,7 +151,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
                         authorities.add(new SimpleGrantedAuthority(rs));
                     }
                 }
-                return new UsernamePasswordAuthenticationToken(username, token, authorities);
+                return new UsernamePasswordAuthenticationToken(uuid, token, authorities);
             }
             return null;
 

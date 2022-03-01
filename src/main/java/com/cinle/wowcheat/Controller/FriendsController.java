@@ -34,14 +34,14 @@ public class FriendsController {
     public AjaxResponse getFriendsList(@RequestBody MyUserDetail userDetail) {
         List<String> uuids = friendsServices.selectFriendUuidList(userDetail.getUuid());
         List users = userServices.selectByFriendsUuidList(uuids, userDetail.getUuid());
-
         AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
         return ajaxResponse;
     }
 
     /**
      * @param friends
-     * @return 添加好友（双向）
+     * @return 返回新列表供更新
+     * 添加好友（双向）
      * 暂未添加请求确认步骤
      */
     @PostMapping("/add")
@@ -72,7 +72,9 @@ public class FriendsController {
             //对方已添加，不重复插入
             friendsServices.insertByUuid(friends.getfUuid(), friends.getsUuid());
         }
-        return ajaxResponse.success().setMessage("添加成功！");
+        List<String> uuids = friendsServices.selectFriendUuidList(friends.getsUuid());
+        List users = userServices.selectByFriendsUuidList(uuids, friends.getsUuid());
+        return ajaxResponse.success().setMessage("添加成功！").setData(JSON.toJSON(users));
     }
 
     /**
@@ -90,7 +92,7 @@ public class FriendsController {
     }
 
     @PostMapping("/changeStatus")
-    public AjaxResponse changeStatus(@RequestBody @Valid Friends friends){
+    public AjaxResponse changeStatus(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
         friendsServices.updateStatusByUuid(friends);
         List<String> uuids = friendsServices.selectFriendUuidList(friends.getsUuid());

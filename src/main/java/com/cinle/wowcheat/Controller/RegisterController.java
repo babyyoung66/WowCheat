@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.cinle.wowcheat.GlobalException.ControllerExceptionDeal;
+import com.cinle.wowcheat.GlobalException.GlobalExceptionDeal;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.SendMailServices;
 import com.cinle.wowcheat.Service.UserServices;
@@ -47,7 +47,7 @@ public class RegisterController {
     /**
      * @param user 用户JSON
      * @return 注册信息
-     * @see ControllerExceptionDeal 注册失败信息已全局捕获
+     * @see GlobalExceptionDeal 注册失败信息已全局捕获
      */
     @ApiOperation(value = "提交注册信息",notes = "")
     @PostMapping("/")

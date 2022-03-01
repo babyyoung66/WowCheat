@@ -31,7 +31,7 @@ public class CustomerAuthenticationEntryPoint implements AuthenticationEntryPoin
         out.write(JSON.toJSONString(ajaxResponse));
         out.flush();
         out.close();
-        log.info("来自主机: {}:{} 的匿名访问......", request.getRemoteHost(), request.getRemotePort());
+        log.info("来自主机: {}:{} 的匿名访问，访问路径为: {}", request.getRemoteHost(), request.getRemotePort(),request.getRequestURI());
 
     }
 }

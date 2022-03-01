@@ -1,9 +1,6 @@
-package com.cinle.wowcheat.Utils;
-
-import sun.security.rsa.RSAKeyFactory;
+package com.cinle.wowcheat.Tools;
 
 import java.security.*;
-import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 

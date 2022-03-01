@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Security;
 
+import com.cinle.wowcheat.Service.JwtTokenService;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,9 @@ public class CustomerLogoutSuccessHandler implements LogoutSuccessHandler {
             String token = request.getHeader("token");
             if (StringUtils.hasText(token)) {
                 Map info = jwtTokenService.getUserInfoFromToken(token);
-                String uuid = (String) info.get("username");
+                String uuid = (String) info.get("uuid");
                 /*清除redis缓存*/
+                jwtTokenService.RemoveTokenOnRedis(uuid);
 
                 AjaxResponse ajaxResponse = new AjaxResponse().success().setMessage("注销成功！").setCode(401);
                 //MyUserDetail userDetail = (MyUserDetail) authentication.getPrincipal(); //换成token验证，弃用

@@ -1,14 +1,11 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
-import com.cinle.wowcheat.GlobalException.ControllerExceptionDeal;
-import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +42,9 @@ public class UserController {
                 return ajaxResponse.success().setData(JSON.toJSON(usr));
             }
         }
-        return ajaxResponse.error().success().setMessage("该用户不存在！");
+        return ajaxResponse.error().error().setMessage("该用户不存在！");
     }
+
+    //public AjaxResponse EditPhoto(@RequestBody )
+
 }

@@ -1,9 +1,11 @@
 package com.cinle.wowcheat.Security;
 
+import com.cinle.wowcheat.Service.JwtTokenService;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -12,18 +14,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
-
-import javax.annotation.Resource;
-import javax.sql.DataSource;
 
 /**
  * @author BabyYoung
@@ -54,10 +46,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/register/*", "/auth/*").permitAll()
                 //放行swagger
                 .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/swagger-ui/*").permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().authenticated()
                 // .access("@checkRoles.hasPermission(request,authentication)")
                 .and()
-                .addFilter(new TokenAuthenticationFilter(authenticationManager()).setService(roleServices,jwtTokenService)).httpBasic()
+                .addFilter(new TokenAuthenticationFilter(authenticationManager()).setService(jwtTokenService)).httpBasic()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(new CustomerAuthenticationEntryPoint()) //未登录处理
@@ -84,6 +77,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
+
+
 //
 //    @Bean
 //    HttpSessionEventPublisher httpSessionEventPublisher() {
@@ -108,7 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //放行静态资源
-        web.ignoring().antMatchers("classpath:/css/**", "static/**");
+        web.ignoring().antMatchers("classpath:/css/**", "static/**","/WowCheat/**");
     }
 
     /**

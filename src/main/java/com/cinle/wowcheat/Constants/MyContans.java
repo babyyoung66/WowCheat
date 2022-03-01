@@ -23,11 +23,11 @@ public class MyContans {
     public static final int EMAIL_CODE_LENGTH = 6;
 
 
-    /**
+    /** 秒
      * Token过期时间
-     * 7天
+     * 7 * 24 * 60 * 60 秒
      */
-    public static final long TOKEN_Expiration = 7 * 24 * 60 * 60 * 1000;
+    public static final long TOKEN_Expiration = 7 * 24 * 60 * 60;
 
     /**
      * Token 密钥
@@ -37,7 +37,8 @@ public class MyContans {
 
     public static final String TOKEN_ISSUER = "WOW_CHEAT";
 
-    public static final String FILE_BASE_URL = "https://www.cinle.icu:9999";
+
+    public static final String FILE_BASE_URL = "https://127.0.0.1:8080/WowCheat/";
 
 
 }
