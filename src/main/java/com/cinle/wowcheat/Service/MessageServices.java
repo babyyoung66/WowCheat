@@ -1,12 +1,15 @@
 package com.cinle.wowcheat.Service;
 
 import com.cinle.wowcheat.Constants.MessageConst;
+import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.Message;
+import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -109,6 +112,26 @@ public class MessageServices {
         List<Message> list = mongoTemplate.find(query,Message.class,collectionName);
         Collections.reverse(list);//由于是降序查询，需要反转回降序给前端
         return list;
+    }
+
+    /**
+     * 更新好友消息的读取状态
+     * @param friends
+     * @return
+     */
+    public int updateCheckStatus(Friends friends,String collectionName){
+        Date now = new Date();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("time").lte(now)
+                                   .and("check").is(false)
+                                   .and("to").is(friends.getsUuid())
+                                   .and("form").is(friends.getfUuid())
+        );
+        Update update = new Update();
+        update.set("check",true);
+        //updateMulti 更新所有符合的数据
+        UpdateResult rs = mongoTemplate.updateMulti(query,update,Message.class,collectionName);
+        return rs == null?0:1;
     }
 
 

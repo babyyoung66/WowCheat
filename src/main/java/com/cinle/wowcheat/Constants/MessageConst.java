@@ -15,7 +15,7 @@ public class MessageConst {
     /**
      * 分页数量
      */
-    public static final int Page_Num = 1;
+    public static final int Page_Num = 40;
 
 
 }
