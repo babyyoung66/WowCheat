@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Event;
 
 import com.cinle.wowcheat.Model.MyUserDetail;
-import com.cinle.wowcheat.Service.JwtTokenService;
+import com.cinle.wowcheat.Security.JwtTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -19,7 +19,7 @@ public class UserChangeEventListener  {
     @Autowired
     private JwtTokenService jwtTokenService;
 
-    @Async
+    @Async("UserChangeEventListener")
     @EventListener(UserChangeEvent.class)
     public void removeTokenOnRedis(UserChangeEvent event){
         MyUserDetail user = (MyUserDetail) event.getSource();

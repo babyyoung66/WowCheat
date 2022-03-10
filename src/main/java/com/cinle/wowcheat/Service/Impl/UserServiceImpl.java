@@ -1,14 +1,15 @@
 package com.cinle.wowcheat.Service.Impl;
 
-import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdUtil;
 import com.cinle.wowcheat.Dao.UserdetailDao;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Security.CustomerUserDetails;
 import com.cinle.wowcheat.Service.UserServices;
+import com.cinle.wowcheat.Tools.DesensitizedUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +51,10 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public int updateByUUIDSelective(MyUserDetail record) {
+        BCryptPasswordEncoder bcry = new BCryptPasswordEncoder();
+        if (StringUtils.hasText(record.getPassword())){
+            record.setPassword(bcry.encode(record.getPassword()));
+        }
         return userdetailDao.updateByUUIDSelective(record);
     }
 

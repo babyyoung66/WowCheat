@@ -26,6 +26,10 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     mapUnderscoreToCamelCase: true  #开启映射下划线字段
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+
+
 
 #Swagger 配置
 swagger:

@@ -1,6 +1,6 @@
 package com.cinle.wowcheat.Security;
 
-import com.cinle.wowcheat.Service.JwtTokenService;
+import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -103,7 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //放行静态资源
-        web.ignoring().antMatchers("classpath:/css/**", "static/**","/WowCheat/**");
+        web.ignoring().antMatchers("classpath:/css/**", "/static/**", FileConst.ACCESS_PATH + "**");
     }
 
     /**

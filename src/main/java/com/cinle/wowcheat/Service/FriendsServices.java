@@ -18,9 +18,11 @@ public interface FriendsServices {
 
     Friends selectByPrimaryKey(Integer autoId);
 
-    int updateStatusByUuid(Friends record);
+    int updateStatusByUuid(String sUuid ,  String fUuid,Integer status);
 
     List<String> selectFriendUuidList(String sUuid);
 
     Friends findFriend(String sUuid ,  String fUuid);
+
+    int updateRemarksByUuid(Friends friends);
 }

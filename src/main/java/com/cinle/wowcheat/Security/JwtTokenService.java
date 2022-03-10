@@ -1,17 +1,19 @@
-package com.cinle.wowcheat.Service;
+package com.cinle.wowcheat.Security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.cinle.wowcheat.Constants.MyContans;
+import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Model.Role;
+import com.cinle.wowcheat.Service.RoleServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -46,24 +48,28 @@ public class JwtTokenService {
     public String createToken(String uuid, List<String> role) {
         String key = KEY_HEAD + uuid;
         String token = JWT.create()
-                .withIssuer(MyContans.TOKEN_ISSUER)
+                .withIssuer(MyConst.TOKEN_ISSUER)
                 .withSubject(uuid) //签名标题
                 .withClaim("role", role)
                 .withIssuedAt(new Date())  //签名时间
-                .withExpiresAt(new Date(System.currentTimeMillis() + MyContans.TOKEN_Expiration * 1000)) //过期时间
-                .sign(Algorithm.HMAC256(MyContans.TOKEN_PRIVATE_KEY));
+                .withExpiresAt(new Date(System.currentTimeMillis() + MyConst.TOKEN_Expiration * 1000)) //过期时间
+                .sign(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY));
         //存入redis 7天
-        redisTemplate.opsForValue().set(key, token, MyContans.TOKEN_Expiration, TimeUnit.SECONDS);
+        setTokenToRedis(key,token);
         return token;
     }
 
+    @Async
+    void setTokenToRedis(String key, String token){
+        redisTemplate.opsForValue().set(key, token, MyConst.TOKEN_Expiration, TimeUnit.SECONDS);
+    }
 
     public Map getUserInfoFromToken(String token) {
         Map map = new HashMap();
         try {
             //只要密钥不变就能转换，密钥改变则报异常
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyContans.TOKEN_PRIVATE_KEY))
-                    .withIssuer(MyContans.TOKEN_ISSUER)
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
+                    .withIssuer(MyConst.TOKEN_ISSUER)
                     .build();
             DecodedJWT decodedJWT = verifier.verify(token);
             String uuid = decodedJWT.getSubject();
@@ -84,6 +90,7 @@ public class JwtTokenService {
         return tt.equals(token);
     }
 
+    @Async
     public void RemoveTokenOnRedis(String uuid){
         String key = KEY_HEAD + uuid;
         redisTemplate.opsForValue().getOperations().delete(key);
@@ -92,8 +99,8 @@ public class JwtTokenService {
     public boolean CheckToken(String token) {
         try {
             //只要密钥不变就能转换，密钥改变则报异常
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyContans.TOKEN_PRIVATE_KEY))
-                    .withIssuer(MyContans.TOKEN_ISSUER)
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
+                    .withIssuer(MyConst.TOKEN_ISSUER)
                     .build();
             DecodedJWT decodedJWT = verifier.verify(token);
             return true;
@@ -109,8 +116,8 @@ public class JwtTokenService {
      */
     public boolean isTokenExpires(String token) {
         try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyContans.TOKEN_PRIVATE_KEY))
-                    .withIssuer(MyContans.TOKEN_ISSUER)
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
+                    .withIssuer(MyConst.TOKEN_ISSUER)
                     .build();
             DecodedJWT decodedJWT = verifier.verify(token);
             Date Expires = decodedJWT.getExpiresAt();
@@ -132,8 +139,8 @@ public class JwtTokenService {
         String newToken = "";
         try {
             //只要密钥不变就能转换，密钥改变则报异常
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyContans.TOKEN_PRIVATE_KEY))
-                    .withIssuer(MyContans.TOKEN_ISSUER)
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
+                    .withIssuer(MyConst.TOKEN_ISSUER)
                     .build();
             DecodedJWT decodedJWT = verifier.verify(token);
             Date Expires = decodedJWT.getExpiresAt();

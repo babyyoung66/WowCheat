@@ -1,6 +1,6 @@
 package com.cinle.wowcheat.Service;
 
-import com.cinle.wowcheat.Constants.MyContans;
+import com.cinle.wowcheat.Constants.MyConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,7 +45,7 @@ public class VerifyService {
         String co = (String) redisTemplate.opsForValue().get(key);
         if (co != null && co.equals(code)) {
             /*返回true 并将redis状态改为true，保存5分钟*/
-            redisTemplate.opsForValue().set(key, successStatus, MyContans.CODE_KEEPALIVE_TIME, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(key, successStatus, MyConst.CODE_KEEPALIVE_TIME, TimeUnit.SECONDS);
             log.info("验证成功，将Redis中邮箱验证码key:{}的状态设置为:{}", key ,code+"#true");
             return "验证成功，请在5分钟内完成注册!";
         }

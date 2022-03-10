@@ -5,10 +5,11 @@
         <id column="auto_id" jdbcType="INTEGER" property="autoId"/>
         <result column="s_uuid" jdbcType="VARCHAR" property="sUuid"/>
         <result column="f_uuid" jdbcType="VARCHAR" property="fUuid"/>
-        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="f_remarks" jdbcType="VARCHAR" property="fRemarks"/>
+        <result column="f_status" jdbcType="INTEGER" property="fStatus"/>
     </resultMap>
     <sql id="Base_Column_List">
-    auto_id, s_uuid, f_uuid, `status`
+    auto_id, s_uuid, f_uuid, f_remarks,f_status
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -30,8 +31,11 @@
             <if test="fUuid != null">
                 f_uuid,
             </if>
-            <if test="status != null">
-                `status`,
+            <if test="fRemarks != null">
+                f_remarks,
+            </if>
+            <if test="fStatus != null">
+                `f_status`,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -41,19 +45,22 @@
             <if test="fUuid != null">
                 #{fUuid,jdbcType=VARCHAR},
             </if>
-            <if test="status != null">
-                #{status,jdbcType=INTEGER},
+            <if test="fRemarks != null">
+                #{fRemarks},
+            </if>
+            <if test="fStatus != null">
+                #{fStatus,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
     <update id="updateStatusByUuid" parameterType="com.cinle.wowcheat.Model.Friends">
         update wow_friends
         <set>
-            <if test="status != null">
-                `status` = #{status,jdbcType=INTEGER},
+            <if test="fStatus != null">
+                `f_status` = #{fStatus},
             </if>
         </set>
-        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
+        where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
     </update>
     <insert id="insertByUuid">
         insert into wow_friends
@@ -71,4 +78,14 @@
         from wow_friends
         where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
     </select>
+
+    <update id="updateRemarksByUuid">
+        update wow_friends
+        <set>
+            <if test="fRemarks != null">
+                f_remarks = #{fRemarks},
+            </if>
+        </set>
+        where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+    </update>
 </mapper>

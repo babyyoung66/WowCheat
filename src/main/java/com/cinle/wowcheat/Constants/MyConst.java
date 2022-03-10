@@ -4,7 +4,7 @@ package com.cinle.wowcheat.Constants;
  * @Author JunLe
  * @Time 2022/2/24 14:02
  */
-public class MyContans {
+public class MyConst{
     /**
      * 邮箱验证重发等待时间
      * 单位秒
@@ -38,7 +38,6 @@ public class MyContans {
     public static final String TOKEN_ISSUER = "WOW_CHEAT";
 
 
-    public static final String FILE_BASE_URL = "https://127.0.0.1:8080/WowCheat/";
 
 
 }

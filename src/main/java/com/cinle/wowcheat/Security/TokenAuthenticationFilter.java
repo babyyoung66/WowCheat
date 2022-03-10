@@ -2,8 +2,6 @@ package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Enum.RoleEnum;
-import com.cinle.wowcheat.Service.JwtTokenService;
-import com.cinle.wowcheat.Service.RoleServices;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,9 +61,10 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             authenticationToken = getAuthentication(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            response.setStatus(401);
             AjaxResponse ajaxResponse = new AjaxResponse();
-            ajaxResponse.error().setMessage("Token处理失败！" + e.getClass());
+            ajaxResponse.error().setMessage("Token处理失败！" + e.getMessage()).setCode(401);
             PrintWriter out = response.getWriter();
             out.println(JSON.toJSONString(ajaxResponse));
             out.flush();
@@ -106,6 +104,8 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         if (StringUtils.hasText(token)) {
+         /*
+            //已交由redis判断
             boolean isExpires = jwtTokenService.isTokenExpires(token);
             if (isExpires){
                 response.setStatus(401);
@@ -115,16 +115,15 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
                 out.flush();
                 out.close();
                 return null;
-            }
+            }*/
 
             //校验合法性
             Map info = jwtTokenService.getUserInfoFromToken(token);
             String uuid = (String) info.get("uuid");
-            System.out.println("uuid = " + uuid);
             boolean isOnRedis = jwtTokenService.CheckTokenByRedis(uuid,token);
             if (!isOnRedis || info.isEmpty()) {
                 response.setStatus(401);
-                ajaxResponse.error().setMessage("Token失效，请重新登录！").setCode(403);
+                ajaxResponse.error().setMessage("Token失效，请重新登录！").setCode(401);
                 PrintWriter out = response.getWriter();
                 out.println(JSON.toJSONString(ajaxResponse));
                 out.flush();

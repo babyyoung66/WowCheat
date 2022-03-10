@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://wowcheat:qwe11011.@101.35.87.195:27017/wowcheat?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false

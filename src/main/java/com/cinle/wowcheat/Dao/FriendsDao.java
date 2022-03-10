@@ -17,10 +17,12 @@ public interface FriendsDao {
 
     Friends selectByPrimaryKey(Integer autoId);
 
-    int updateStatusByUuid(Friends record);
+    int updateStatusByUuid(@Param("s_uuid")String sUuid ,@Param("f_uuid") String fUuid,@Param("fStatus") Integer status);
 
     List<String> selectFriendUuidList(String sUuid);
 
     Friends findFriend(@Param("s_uuid")String sUuid ,@Param("f_uuid") String fUuid);
+
+    int updateRemarksByUuid(Friends friends);
 
 }

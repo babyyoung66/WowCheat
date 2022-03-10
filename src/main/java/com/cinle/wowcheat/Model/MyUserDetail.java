@@ -78,6 +78,8 @@ public class MyUserDetail implements Serializable {
     @ApiModelProperty(value = "账号状态，1正常，2限制登录")
     private Integer status;
 
+    private Friends friendsInfo;
+
     private static final long serialVersionUID = 1L;
 
     public Integer getAutoId() {
@@ -184,9 +186,21 @@ public class MyUserDetail implements Serializable {
         this.status = status;
     }
 
+    public Friends getFriendsInfo() {
+        return friendsInfo;
+    }
+
+    public void setFriendsInfo(Friends friendsInfo) {
+        this.friendsInfo = friendsInfo;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     @Override
     public String toString() {
-        return "UserDetail{" +
+        return "MyUserDetail{" +
                 "autoId=" + autoId +
                 ", uuid='" + uuid + '\'' +
                 ", wowId='" + wowId + '\'' +
@@ -200,6 +214,7 @@ public class MyUserDetail implements Serializable {
                 ", address='" + address + '\'' +
                 ", creattime=" + creattime +
                 ", status=" + status +
+                ", friendsInfo=" + friendsInfo +
                 '}';
     }
 

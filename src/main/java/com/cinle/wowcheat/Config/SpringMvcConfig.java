@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Config;
 
+import com.cinle.wowcheat.Constants.FileConst;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,7 +19,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/WowCheat/**")
-                .addResourceLocations("file:" + BASE_PATH + "/WowCheat/files/");
+        registry.addResourceHandler("/files/**")
+                .addResourceLocations("file:" + FileConst.LOCAL_PATH);
     }
 }

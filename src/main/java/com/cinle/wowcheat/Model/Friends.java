@@ -1,6 +1,9 @@
 package com.cinle.wowcheat.Model;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 /**
@@ -13,7 +16,6 @@ public class Friends implements Serializable {
     /**
      * 用户uuid
      */
-    @NotBlank(message = "自身uuid不能为空！")
     private String sUuid;
 
     /**
@@ -23,9 +25,17 @@ public class Friends implements Serializable {
     private String fUuid;
 
     /**
-     * 好友状态（1正常，2屏蔽，3拉黑）默认1
+     * 好友备注
      */
-    private Integer status;
+    @Length(max = 12,message = "备注长度0-12位!")
+    @Pattern(regexp = "[^<>#^\\r\\t\\n*&\\\\/$]*?",
+            message = "备注不能包含特殊符号!")
+    private String fRemarks;
+
+    /**
+     * 好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1
+     */
+    private Integer fStatus;
 
     private static final long serialVersionUID = 1L;
 
@@ -53,12 +63,24 @@ public class Friends implements Serializable {
         this.fUuid = fUuid;
     }
 
+    public String getRemarks() {
+        return fRemarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.fRemarks = remarks;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public Integer getStatus() {
-        return status;
+        return fStatus;
     }
 
     public void setStatus(Integer status) {
-        this.status = status;
+        this.fStatus = status;
     }
 
     @Override
@@ -67,7 +89,8 @@ public class Friends implements Serializable {
                 "autoId=" + autoId +
                 ", sUuid='" + sUuid + '\'' +
                 ", fUuid='" + fUuid + '\'' +
-                ", status=" + status +
+                ", Fremarks='" + fRemarks + '\'' +
+                ", Fstatus=" + fStatus +
                 '}';
     }
 }

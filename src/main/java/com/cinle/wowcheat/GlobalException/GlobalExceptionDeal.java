@@ -2,6 +2,8 @@ package com.cinle.wowcheat.GlobalException;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import com.mongodb.MongoSocketReadTimeoutException;
+import io.lettuce.core.RedisCommandTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -13,26 +15,36 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.Iterator;
 import java.util.Set;
 
 /**
  * controller全局异常处理
- * @author BabyYoung
  *
+ * @author BabyYoung
+ * <p>
  * RestControllerAdvice 传入对应的注解类
  */
 @RestControllerAdvice(annotations = {RestController.class, Controller.class})
 public class GlobalExceptionDeal {
 
 
-
+    /**
+     * validate 数据校验异常统一返回
+     *
+     * @param ex
+     * @param request
+     * @return
+     */
     @ExceptionHandler({ConstraintViolationException.class, BindException.class, MethodArgumentNotValidException.class})
     public AjaxResponse validateException(Exception ex, HttpServletRequest request) {
         AjaxResponse ajaxResponse = new AjaxResponse();
-         //ex.printStackTrace();
+        //ex.printStackTrace();
         if (ex instanceof ConstraintViolationException) {
             ConstraintViolationException constraintViolationException =
                     (ConstraintViolationException) ex;
@@ -51,20 +63,16 @@ public class GlobalExceptionDeal {
             }
             return ajaxResponse.error().setMessage(String.valueOf(bf));
         }
-
         if (ex instanceof BindException) {
-
             BindException bindException = (BindException) ex;
             String msg = bindException.getBindingResult().getFieldError().getDefaultMessage();
             return ajaxResponse.error().setMessage(msg);
         }
         if (ex instanceof MethodArgumentNotValidException) {
-
             MethodArgumentNotValidException Exception = (MethodArgumentNotValidException) ex;
             String msg = Exception.getBindingResult().getFieldError().getDefaultMessage();
             return ajaxResponse.error().setMessage(msg);
         }
-
         return null;
 
     }
@@ -75,28 +83,17 @@ public class GlobalExceptionDeal {
      */
     @ExceptionHandler({DataIntegrityViolationException.class})
     public AjaxResponse keysNotNull(Exception ex) {
+        ex.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
-        return ajaxResponse.error().setMessage("用户id或邮箱已被注册!");
+        return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！" + ex.getMessage());
     }
 
 
     /**
      * SQL错误
-     * @param e
-     * @return
      */
-    @ExceptionHandler({java.sql.SQLSyntaxErrorException.class})
-    public AjaxResponse SQLSyntaxError(Exception e){
-        e.printStackTrace();
-        AjaxResponse ajaxResponse = new AjaxResponse();
-        return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
-    }
-
-    /**
-     *
-     * */
-    @ExceptionHandler({java.sql.SQLException.class})
-    public AjaxResponse SQLException(Exception e){
+    @ExceptionHandler({SQLException.class})
+    public AjaxResponse SQLException(Exception e) {
         e.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
@@ -106,20 +103,47 @@ public class GlobalExceptionDeal {
      * jwt解析错误
      */
     @ExceptionHandler({JWTVerificationException.class})
-    public AjaxResponse JWTVerificationException(Exception e ){
-        e.printStackTrace();
-        AjaxResponse ajaxResponse =new AjaxResponse();
-        return ajaxResponse.error().setMessage("token解析错误，请尝试重新登录！");
+    public AjaxResponse JWTVerificationException(Exception e, HttpServletResponse response) {
+        //e.printStackTrace();
+        response.setStatus(401);
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setCode(401).setMessage(e.getMessage());
     }
 
 
     /**
      * Redis连接异常
      */
-    @ExceptionHandler({RedisConnectionFailureException.class})
-    public AjaxResponse RedisConnectionFailureException(Exception e){
+    @ExceptionHandler({RedisConnectionFailureException.class, RedisCommandTimeoutException.class})
+    public AjaxResponse RedisConnectionFailureException(Exception e) {
         e.printStackTrace();
-        AjaxResponse ajaxResponse =new AjaxResponse();
+        AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage("服务器Redis缓存连接失败！");
+    }
+
+    /**
+     * MongoDB连接异常
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({MongoSocketReadTimeoutException.class})
+    public AjaxResponse MongoSocketReadTimeoutException(Exception e) {
+        e.printStackTrace();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setMessage("服务器MongoDB连接失败！");
+    }
+
+    /**
+     * 文件上传异常类
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({UploadFileException.class})
+    public AjaxResponse UploadFileException(Exception e) {
+        e.printStackTrace();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setMessage(e.getMessage());
     }
 }

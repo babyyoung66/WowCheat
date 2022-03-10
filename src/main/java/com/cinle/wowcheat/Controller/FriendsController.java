@@ -1,12 +1,15 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.Enum.CheatStatus;
 import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.UserServices;
+import com.cinle.wowcheat.Tools.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +33,20 @@ public class FriendsController {
     UserServices userServices;
 
 
+    /**
+     * 根据当前请求用户获取
+     * 无需传参
+     *
+     * @return
+     */
     @PostMapping("/getList")
-    public AjaxResponse getFriendsList(@RequestBody MyUserDetail userDetail) {
-        List<String> uuids = friendsServices.selectFriendUuidList(userDetail.getUuid());
-        List users = userServices.selectByFriendsUuidList(uuids, userDetail.getUuid());
-        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
+    public AjaxResponse getFriendsList() {
+        //从security上下文获取请求者信息
+        String selfUuid = SecurityContextUtils.getCurrentUserUUID();
+        List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
+        List users = userServices.selectByFriendsUuidList(uuids, selfUuid);
+        //转一遍string再再转会数组是为了去掉null的字段
+        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.parseArray(JSON.toJSONString(users)));
         return ajaxResponse;
     }
 
@@ -47,15 +59,16 @@ public class FriendsController {
     @PostMapping("/add")
     public AjaxResponse addFriend(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
+        String selfUuid = SecurityContextUtils.getCurrentUserUUID();
         MyUserDetail usr = userServices.selectByUUID(friends.getfUuid());
-        Friends shelf = friendsServices.findFriend(friends.getsUuid(), friends.getfUuid()); //自己
-        Friends target = friendsServices.findFriend(friends.getsUuid(), friends.getfUuid()); //对方
+        Friends isFriend = friendsServices.findFriend(selfUuid, friends.getfUuid()); //自己
+        System.out.println("isFriend = " + isFriend);
         if (usr == null || usr.equals("")) {
             ajaxResponse.error().setMessage("该用户不存在！");
             return ajaxResponse;
         }
-        if (shelf != null || !shelf.equals("")) {
-            int status = shelf.getStatus();
+        if (isFriend != null ) {
+            int status = isFriend.getStatus();
             if (status == 3) {
                 ajaxResponse.error().setMessage("您已将对方拉黑！");
             } else {
@@ -63,17 +76,19 @@ public class FriendsController {
             }
             return ajaxResponse;
         }
+        Friends target = friendsServices.findFriend(friends.getfUuid(), selfUuid); //对方
         if (target != null && target.getStatus() == 3) {
-            return ajaxResponse.error().setMessage("您已被拉黑！");
+            return ajaxResponse.error().setMessage("您已被对方拉黑！");
         }
         //己方添加
-        friendsServices.insertByUuid(friends.getsUuid(), friends.getfUuid());
+        friendsServices.insertByUuid(selfUuid, friends.getfUuid());
         if (target == null) {
             //对方已添加，不重复插入
-            friendsServices.insertByUuid(friends.getfUuid(), friends.getsUuid());
+            friendsServices.insertByUuid(friends.getfUuid(), selfUuid);
         }
-        List<String> uuids = friendsServices.selectFriendUuidList(friends.getsUuid());
-        List users = userServices.selectByFriendsUuidList(uuids, friends.getsUuid());
+        List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
+        List users = userServices.selectByFriendsUuidList(uuids, selfUuid);
+
         return ajaxResponse.success().setMessage("添加成功！").setData(JSON.toJSON(users));
     }
 
@@ -85,18 +100,57 @@ public class FriendsController {
     @PostMapping("/delete")
     public AjaxResponse deleteFriend(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
-        friendsServices.deleteByUuid(friends.getsUuid(), friends.getfUuid());
-        List<String> uuids = friendsServices.selectFriendUuidList(friends.getsUuid());
-        List users = userServices.selectByFriendsUuidList(uuids, friends.getsUuid());
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        friendsServices.deleteByUuid(shelf, friends.getfUuid());
+        friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
+        List users = userServices.selectByFriendsUuidList(uuids, shelf);
         return ajaxResponse.success().setMessage("删除成功！").setData(JSON.toJSON(users));
     }
 
+    /**
+     * 修改好友关系状态
+     *
+     * @param friends
+     * @return
+     */
     @PostMapping("/changeStatus")
     public AjaxResponse changeStatus(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
-        friendsServices.updateStatusByUuid(friends);
-        List<String> uuids = friendsServices.selectFriendUuidList(friends.getsUuid());
-        List users = userServices.selectByFriendsUuidList(uuids, friends.getsUuid());
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        int rs = friendsServices.updateStatusByUuid(shelf, friends.getfUuid(), friends.getStatus());
+        if (rs < 0) {
+            return ajaxResponse.error().setMessage("修改失败，请重新尝试！");
+        }
+        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
+        List users = userServices.selectByFriendsUuidList(uuids, shelf);
+        return ajaxResponse.success().setMessage("更改成功！").setData(JSON.toJSON(users));
+    }
+
+    /**
+     * 修改好友备注
+     *
+     * @param friends 返回新列表
+     * @return
+     */
+    @PostMapping("/editRemarks")
+    public AjaxResponse editRemarks(@RequestBody @Valid Friends friends) {
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        friends.setsUuid(shelf);
+        if (!StringUtils.hasText(friends.getRemarks())) {
+            return ajaxResponse.error().setMessage("请输入备注！");
+        }
+        Friends fri = friendsServices.findFriend(shelf, friends.getfUuid());
+        if (fri == null) {
+            return ajaxResponse.error().setMessage("对方不是您的好友！");
+        }
+        int rs = friendsServices.updateRemarksByUuid(friends);
+        if (rs < 0) {
+            return ajaxResponse.error().setMessage("修改失败，请重新尝试！");
+        }
+        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
+        List users = userServices.selectByFriendsUuidList(uuids, shelf);
         return ajaxResponse.success().setMessage("更改成功！").setData(JSON.toJSON(users));
     }
 
