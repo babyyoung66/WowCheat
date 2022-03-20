@@ -12,6 +12,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -25,7 +31,6 @@ import java.util.List;
 public class MessageServices {
     @Autowired
     private MongoTemplate mongoTemplate;
-
 
     /**
      * @return 返回收发双方全部消息
@@ -59,7 +64,7 @@ public class MessageServices {
      * 传入前一次查询的最早的一条记录
      * 以该条记录的时间作为查询的结束范围
      */
-    public List<Message> findPersonalByPages(Message message,String collectionName) {
+    public List<Message> findMessageByPages(Message message,String collectionName) throws ParseException {
         Date date;
         //时间为空则默认当前时间
         if (message.getTime() ==null || message.getTime().equals("")){
@@ -67,13 +72,16 @@ public class MessageServices {
         }else {
             date = message.getTime(); //将日期格式转换为系统可识别的
         }
+        //转换成Timestamp，直接用date无法精确到毫秒
+        Timestamp timestamp = new Timestamp(date.getTime());
+        System.out.println("timestamp = " + timestamp);
         Query query = new Query(
                 new Criteria().orOperator(
                         Criteria.where("from").is(message.getFrom())
                                 .and("to").is(message.getTo()),
                         Criteria.where("from").is(message.getTo())
                                 .and("to").is(message.getFrom())
-                ).and("time").gte(getQueryStartTime()).lte(date)
+                ).and("time").gte(getQueryStartTime()).lt(timestamp)
         );
         query.with(Sort.by(Sort.Order.desc("time"))).limit(MessageConst.Page_Num);//按时间降序取前40条
         List<Message> list = mongoTemplate.find(query,Message.class,collectionName);
@@ -102,9 +110,11 @@ public class MessageServices {
         }else {
             date = message.getTime(); //将日期格式转换为系统可识别的
         }
+        //转换成Timestamp，直接用date无法精确到毫秒
+        Timestamp timestamp = new Timestamp(date.getTime());
         Query query = new Query(
                         Criteria.where("to").is(message.getTo())
-                        .and("time").gte(getQueryStartTime()).lte(date)
+                        .and("time").gte(getQueryStartTime()).lt(timestamp)
         );
         query.with(Sort.by(Sort.Order.desc("time"))).limit(MessageConst.Page_Num*2);//按时间降序取前80条
         List<Message> list = mongoTemplate.find(query,Message.class,collectionName);
@@ -112,25 +122,6 @@ public class MessageServices {
         return list;
     }
 
-    /**
-     * 更新好友消息的读取状态
-     * @param friends
-     * @return
-     */
-    public int updateCheckStatus(Friends friends,String collectionName){
-        Date now = new Date();
-        Query query = new Query();
-        query.addCriteria(Criteria.where("time").lte(now)
-                                   .and("check").is(false)
-                                   .and("to").is(friends.getsUuid())
-                                   .and("form").is(friends.getfUuid())
-        );
-        Update update = new Update();
-        update.set("check",true);
-        //updateMulti 更新所有符合的数据
-        UpdateResult rs = mongoTemplate.updateMulti(query,update,Message.class,collectionName);
-        return rs == null?0:1;
-    }
 
-
+    
 }
