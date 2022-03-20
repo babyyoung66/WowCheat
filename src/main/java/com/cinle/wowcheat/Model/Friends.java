@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
@@ -38,6 +39,10 @@ public class Friends implements Serializable {
      */
     private Integer fStatus;
 
+    /**
+     * 上次联系时间
+     * */
+    @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
     private Date lastCheatTime;
 
     private static final long serialVersionUID = 1L;
