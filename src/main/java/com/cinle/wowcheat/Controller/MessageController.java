@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,13 +58,13 @@ public class MessageController {
     }
 
     @PostMapping("/getByPage")
-    public AjaxResponse getByPages(@RequestBody Message message) {
+    public AjaxResponse getByPages(@RequestBody Message message) throws ParseException {
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         message.setFrom(uuid);
         AjaxResponse response = new AjaxResponse();
-        List personalMess = messageServices.findPersonalByPages(message,"personal");
+        List personalMess = messageServices.findMessageByPages(message,"personal");
         //有可能是群聊
-        List GroupMess = messageServices.findPersonalByPages(message,"group");
+        List GroupMess = messageServices.findMessageByPages(message,"group");
         if(!personalMess.isEmpty()){
             response.setData(JSON.toJSON(personalMess));
         }
