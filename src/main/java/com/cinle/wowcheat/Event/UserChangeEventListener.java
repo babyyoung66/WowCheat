@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Event;
 
+import com.cinle.wowcheat.GlobalException.RedisOptionsException;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Security.JwtTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,9 @@ public class UserChangeEventListener  {
     @Autowired
     private JwtTokenService jwtTokenService;
 
-    @Async("UserChangeEventListener")
+    @Async("AsyncExecutor")
     @EventListener(UserChangeEvent.class)
-    public void removeTokenOnRedis(UserChangeEvent event){
+    public void removeTokenOnRedis(UserChangeEvent event) throws RedisOptionsException {
         MyUserDetail user = (MyUserDetail) event.getSource();
         jwtTokenService.RemoveTokenOnRedis(user.getUuid());
     }

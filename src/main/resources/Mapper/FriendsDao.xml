@@ -7,9 +7,10 @@
         <result column="f_uuid" jdbcType="VARCHAR" property="fUuid"/>
         <result column="f_remarks" jdbcType="VARCHAR" property="fRemarks"/>
         <result column="f_status" jdbcType="INTEGER" property="fStatus"/>
+        <result column="lastCheatTime" property="lastCheatTime"/>
     </resultMap>
     <sql id="Base_Column_List">
-    auto_id, s_uuid, f_uuid, f_remarks,f_status
+    auto_id, s_uuid, f_uuid, f_remarks,f_status,lastCheatTime
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -37,6 +38,10 @@
             <if test="fStatus != null">
                 `f_status`,
             </if>
+
+            <if test="lastCheatTime != null">
+                lastCheatTime,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="sUuid != null">
@@ -50,6 +55,9 @@
             </if>
             <if test="fStatus != null">
                 #{fStatus,jdbcType=INTEGER},
+            </if>
+            <if test="lastCheatTime != null">
+                #{lastCheatTime,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
@@ -87,5 +95,14 @@
             </if>
         </set>
         where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+    </update>
+    <update id="updateLastCheatTime">
+        update wow_friends
+        <set>
+            <if test="lastCheatTime != null">
+                lastCheatTime = #{lastCheatTime},
+            </if>
+        </set>
+        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
     </update>
 </mapper>

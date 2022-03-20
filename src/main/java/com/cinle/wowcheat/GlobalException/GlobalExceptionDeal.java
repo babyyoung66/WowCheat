@@ -4,8 +4,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import com.mongodb.MongoSocketReadTimeoutException;
 import io.lettuce.core.RedisCommandTimeoutException;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -114,11 +118,18 @@ public class GlobalExceptionDeal {
     /**
      * Redis连接异常
      */
-    @ExceptionHandler({RedisConnectionFailureException.class, RedisCommandTimeoutException.class})
+    @ExceptionHandler({RedisConnectionFailureException.class, RedisCommandTimeoutException.class, QueryTimeoutException.class})
     public AjaxResponse RedisConnectionFailureException(Exception e) {
         e.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
-        return ajaxResponse.error().setMessage("服务器Redis缓存连接失败！");
+        return ajaxResponse.error().setMessage("数据库查询异常！" + e.getMessage());
+    }
+
+    @ExceptionHandler(RedisOptionsException.class)
+    public AjaxResponse RedisOptionsException(Exception e) {
+        e.printStackTrace();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setMessage(e.getMessage());
     }
 
     /**
@@ -142,8 +153,21 @@ public class GlobalExceptionDeal {
      */
     @ExceptionHandler({UploadFileException.class})
     public AjaxResponse UploadFileException(Exception e) {
-        e.printStackTrace();
+//        e.printStackTrace();
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler({MultipartException.class})
+    public AjaxResponse MultipartException(Exception e) {
+//        e.printStackTrace();
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        if (e instanceof SizeLimitExceededException || e instanceof MaxUploadSizeExceededException){
+            ajaxResponse.error().setMessage("文件上传超过限制大小(10M)！");
+        }else {
+            ajaxResponse.error().setMessage(e.getMessage());
+            e.printStackTrace();
+        }
+        return ajaxResponse;
     }
 }

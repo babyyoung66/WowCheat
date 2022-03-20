@@ -52,7 +52,7 @@ public class SendMailServices {
         if (time < timer || time <= 0){
             verifyService.setEmailCode(to,code);
             MailMessage mailMessage = new MailMessage();
-            mailMessage.setTo(to).setSubject("WowCheat").setContent("感谢您的注册!以下是您的验证码:" + code + "(有效期5分钟)。");
+            mailMessage.setTo(to).setSubject("【WowCheat】").setContent("【WowCheat】注册验证码:" + code + "，此验证码仅用于WowCheat账号注册，请勿将验证码提供给他人！验证码5分钟内有效，请及时完成注册验证。如非本人操作，请忽略该邮件，祝您生活愉快！");
             ApplicationEvent event = new SendMailEvent(mailMessage);
             applicationContext.publishEvent(event);
             return 0;

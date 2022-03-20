@@ -25,4 +25,6 @@ public interface FriendsServices {
     Friends findFriend(String sUuid ,  String fUuid);
 
     int updateRemarksByUuid(Friends friends);
+
+    int updateLastCheatTime(Friends friends);
 }

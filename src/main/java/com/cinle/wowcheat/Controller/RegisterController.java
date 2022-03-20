@@ -11,7 +11,6 @@ import com.cinle.wowcheat.Vo.RegisterVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +51,7 @@ public class RegisterController {
      */
     @ApiOperation(value = "提交注册信息",notes = "")
     @PostMapping("/")
-    public AjaxResponse userRegister(@RequestBody @Valid MyUserDetail user, HttpServletRequest request) {
+    public AjaxResponse userRegister(@RequestBody @Valid MyUserDetail user) {
 
         AjaxResponse ajaxResponse = new AjaxResponse();
         List<MyUserDetail> list =  userServices.selectByWowIdOrEmail(user);
@@ -122,7 +121,7 @@ public class RegisterController {
 
     @ApiOperation(value = "检查Id是否可用",notes = "")
     @PostMapping("/isIdHasRegister")
-    public AjaxResponse isIdHasRegister(@RequestBody @Valid RegisterVo user){
+    public AjaxResponse isIdHasRegister(@org.jetbrains.annotations.NotNull @RequestBody @Valid RegisterVo user){
         AjaxResponse ajaxResponse = new AjaxResponse();
         if (user.getWowId() == null || "".equals(user.getWowId())){
             return ajaxResponse.error().setMessage("请输入Id!");

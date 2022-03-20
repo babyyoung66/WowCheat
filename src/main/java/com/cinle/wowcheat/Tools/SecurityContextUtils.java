@@ -1,6 +1,10 @@
 package com.cinle.wowcheat.Tools;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @Author JunLe
@@ -16,5 +20,9 @@ public class SecurityContextUtils {
      */
     public static String getCurrentUserUUID(){
         return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public static Collection<? extends GrantedAuthority> getCurrentUserAuthentication(){
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities();
     }
 }

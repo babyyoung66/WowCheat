@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.GlobalException.RedisOptionsException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,16 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
                 roles.add(it.next().toString());
             }
 
-            String token = jwtTokenService.createToken(userDetail.getUuid(),roles);
+            String token = null;
+            try {
+                token = jwtTokenService.createToken(userDetail.getUuid(),roles);
+            } catch (Exception e) {
+                log.warn("用户验证成功后出现异常！原因: " + e.getMessage());
+                e.printStackTrace();
+                response.getWriter().write(JSON.toJSONString(ajaxResponse.error().setMessage(e.getMessage())));
+                response.getWriter().flush();
+                response.getWriter().close();
+            }
             Map map = new HashMap();
             map.put("token",token);
             map.put("user",userDetail);

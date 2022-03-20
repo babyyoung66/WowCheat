@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Enum.RoleEnum;
+import com.cinle.wowcheat.GlobalException.RedisOptionsException;
 import com.cinle.wowcheat.Model.Role;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class JwtTokenService {
      * @param role
      * @return
      */
-    public String createToken(String uuid, List<String> role) {
+    public String createToken(String uuid, List<String> role) throws RedisOptionsException {
         String key = KEY_HEAD + uuid;
         String token = JWT.create()
                 .withIssuer(MyConst.TOKEN_ISSUER)
@@ -60,8 +61,14 @@ public class JwtTokenService {
     }
 
     @Async
-    void setTokenToRedis(String key, String token){
-        redisTemplate.opsForValue().set(key, token, MyConst.TOKEN_Expiration, TimeUnit.SECONDS);
+    void setTokenToRedis(String key, String token) throws RedisOptionsException {
+        try {
+            redisTemplate.opsForValue().set(key, token, MyConst.TOKEN_Expiration, TimeUnit.SECONDS);
+        }catch (Exception e){
+            log.info("Redis操作异常！" + e.getMessage());
+            throw new RedisOptionsException("Redis操作异常！" + e.getMessage());
+        }
+
     }
 
     public Map getUserInfoFromToken(String token) {
@@ -91,9 +98,15 @@ public class JwtTokenService {
     }
 
     @Async
-    public void RemoveTokenOnRedis(String uuid){
+    public void RemoveTokenOnRedis(String uuid) throws RedisOptionsException {
         String key = KEY_HEAD + uuid;
-        redisTemplate.opsForValue().getOperations().delete(key);
+        try {
+            redisTemplate.opsForValue().getOperations().delete(key);
+        }catch (Exception e){
+            log.info("Redis操作异常！" + e.getMessage());
+            throw new RedisOptionsException("Redis操作异常！" + e.getMessage());
+        }
+
     }
 
     public boolean CheckToken(String token) {

@@ -84,8 +84,6 @@ public class MessageServices {
     public int saveMessage(Message message,String collectionName){
         Date now = new Date();
         message.setTime(now);
-        //默认未读状态
-        message.setCheck(false);
         Message result = mongoTemplate.save(message,collectionName);
         return result==null?0:1;
 

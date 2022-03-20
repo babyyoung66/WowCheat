@@ -25,4 +25,6 @@ public interface FriendsDao {
 
     int updateRemarksByUuid(Friends friends);
 
+    int updateLastCheatTime(Friends friends);
+
 }

@@ -54,8 +54,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         response.setContentType("application/json;charset=UTF-8");
-        //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //System.out.println("authentication = " + authentication);
 
         UsernamePasswordAuthenticationToken authenticationToken = null;
         try {
@@ -70,28 +68,16 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             out.flush();
             out.close();
         }
-        // System.out.println("authenticationToken = " + authenticationToken);
         if (authenticationToken != null) {
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            chain.doFilter(request, response);
-        } else {
-            return;
-            /** 为空时
-             * 交给security的过滤链处理，不然就自己校验URL
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);;
+        }
+            /** 无论是否认证成功
+             * 交给security的过滤链处理，不然就自己校验URL、做无权限处理
              * 由 FilterSecurityInterceptor 最后决定是否通过
              * 该过滤器是SpringSecurity最终决定是否放行的过滤器
              * */
-            /*AjaxResponse ajaxResponse = new AjaxResponse();
-            response.setStatus(403);
-            ajaxResponse.error().setMessage("无权限操作，请联系管理员！").setCode(403);
-            PrintWriter out = response.getWriter();
-            out.println(JSON.toJSONString(ajaxResponse));
-            out.flush();
-            out.close();
-            return;*/
-        }
-
-        //super.doFilterInternal(request, response, chain);
+        chain.doFilter(request, response);
+//        super.doFilterInternal(request, response, chain);
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {

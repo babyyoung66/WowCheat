@@ -19,7 +19,7 @@ public class SendMailEventListener {
     @Autowired
     SendMailUtils mailComponent;
 
-    @Async("SendMailEventListener")//异步处理
+    @Async("AsyncExecutor")//异步处理
     @EventListener(SendMailEvent.class)
     public void sendMail(SendMailEvent event){
         MailMessage mailMessage = (MailMessage) event.getSource();

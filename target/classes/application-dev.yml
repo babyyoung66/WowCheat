@@ -9,6 +9,12 @@ spring:
       #而SpringBoot 2.6.X使用的是PathPatternMatcher。
       #所有得修改配置
 
+  servlet:
+    multipart:
+      max-file-size: 10240000 #限制单个文件或者总上传大小，单位为 bit
+      max-request-size: 10240000
+      resolve-lazily: true #让报错转给手动判断处理
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/wowcheat?serverTimezone=Asia/Shanghai&&useSSL=false

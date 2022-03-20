@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.sql.Date;
 
 /**
  * wow_friends
@@ -36,6 +37,8 @@ public class Friends implements Serializable {
      * 好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1
      */
     private Integer fStatus;
+
+    private Date lastCheatTime;
 
     private static final long serialVersionUID = 1L;
 
@@ -83,14 +86,24 @@ public class Friends implements Serializable {
         this.fStatus = status;
     }
 
+
+    public Date getLastCheatTime() {
+        return lastCheatTime;
+    }
+
+    public void setLastCheatTime(Date lastCheatTime) {
+        this.lastCheatTime = lastCheatTime;
+    }
+
     @Override
     public String toString() {
         return "Friends{" +
                 "autoId=" + autoId +
                 ", sUuid='" + sUuid + '\'' +
                 ", fUuid='" + fUuid + '\'' +
-                ", Fremarks='" + fRemarks + '\'' +
-                ", Fstatus=" + fStatus +
+                ", fRemarks='" + fRemarks + '\'' +
+                ", fStatus=" + fStatus +
+                ", lastCheatTime=" + lastCheatTime +
                 '}';
     }
 }

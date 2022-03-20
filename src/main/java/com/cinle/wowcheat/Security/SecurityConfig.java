@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Security;
 
 import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

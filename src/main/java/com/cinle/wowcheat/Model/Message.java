@@ -25,6 +25,8 @@ public class Message {
 
     private String contentType;
 
+    private FileDetail fileDetail;
+
     /**
      * 是否读取默认false
      */
@@ -107,6 +109,15 @@ public class Message {
         return this;
     }
 
+    public FileDetail getFileDetail() {
+        return fileDetail;
+    }
+
+    public Message setFileDetail(FileDetail fileDetail) {
+        this.fileDetail = fileDetail;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
@@ -115,6 +126,7 @@ public class Message {
                 ", to='" + to + '\'' +
                 ", content='" + content + '\'' +
                 ", contentType='" + contentType + '\'' +
+                ", fileDetail=" + fileDetail +
                 ", check=" + check +
                 ", time=" + time +
                 ", msgType='" + msgType + '\'' +

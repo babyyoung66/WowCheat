@@ -16,7 +16,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://127.0.0.1")  //springboot2.6 之后强制指定，不给使用*
+                .allowedOrigins("127.0.0.1")  //springboot2.6 之后强制指定，不给使用*
                 .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowedOriginPatterns("*")

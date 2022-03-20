@@ -3,6 +3,7 @@ package com.cinle.wowcheat.Tools;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Enum.FileType;
 import com.cinle.wowcheat.GlobalException.UploadFileException;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -83,37 +84,34 @@ public class UploadUtils {
 
     public static void uploadFile(MultipartFile file, String filePath, FileType type) throws UploadFileException {
         Path path = Paths.get(FileConst.LOCAL_PATH + filePath);
-        boolean exits = Files.exists(path);
-        if (exits) {
-            throw new UploadFileException("内部服务错误，请尝试重新上传！");
-        }
         boolean checkSize = cheekSize(file.getSize(), type);
         if (!checkSize) {
             throw new UploadFileException(getLimitString(type) + "!");
         }
         try {
             file.transferTo(path);
-        }catch (IOException e) {
-            log.info("文件上传失败,文件名: {},上传者: {},失败原因: {}",filePath,SecurityContextUtils.getCurrentUserUUID(),e.getMessage());
-           // e.printStackTrace();
-            throw new UploadFileException("文件上传失败！" + e.getMessage());
+
+        } catch (IOException e) {
+            log.info("文件上传失败,文件名: {},上传者: {},失败原因: {}", filePath, SecurityContextUtils.getCurrentUserUUID(), e.getMessage());
+            // e.printStackTrace();
+            throw new UploadFileException("文件上传失败！\n" + e.getMessage());
         }
     }
 
-    public static void removeFile(String filePath){
-        if (!StringUtils.hasText(filePath)){
+    public static void removeFile(String fileUrl) throws FileUploadException {
+        if (!StringUtils.hasText(fileUrl)) {
             return;
         }
         //将数据库存储的URL转换为本地URL
-        String realPath = filePath.replace(FileConst.UPLOAD_BASE_PATH,FileConst.LOCAL_PATH);
+        String realPath = fileUrl.replace(FileConst.UPLOAD_BASE_PATH, FileConst.LOCAL_PATH);
         Path path = Paths.get(realPath);
-        if (Files.exists(path)){
-                try {
-                    Files.delete(path);
-                } catch (IOException e) {
-                    log.info("删除文件失败,文件路径为: {},原因: {}",realPath,e.getMessage());
-                    e.printStackTrace();
-                }
+        if (Files.exists(path)) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                log.info("删除文件失败,文件路径为: {},原因: {}", realPath, e.getMessage());
+                throw new FileUploadException("文件删除失败！\n" + e.getMessage());
+            }
 
         }
     }

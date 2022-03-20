@@ -45,8 +45,8 @@ public class FriendsController {
         String selfUuid = SecurityContextUtils.getCurrentUserUUID();
         List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
         List users = userServices.selectByFriendsUuidList(uuids, selfUuid);
-        //转一遍string再再转会数组是为了去掉null的字段
-        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.parseArray(JSON.toJSONString(users)));
+        //转一遍string再再转会数组是为了去掉null的字段 JSON.parseArray(JSON.toJSONString(users))
+        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
         return ajaxResponse;
     }
 
@@ -60,9 +60,10 @@ public class FriendsController {
     public AjaxResponse addFriend(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
         String selfUuid = SecurityContextUtils.getCurrentUserUUID();
-        MyUserDetail usr = userServices.selectByUUID(friends.getfUuid());
-        Friends isFriend = friendsServices.findFriend(selfUuid, friends.getfUuid()); //自己
-        System.out.println("isFriend = " + isFriend);
+        String fUUid = friends.getfUuid();
+        MyUserDetail usr = userServices.selectByUUID(fUUid);
+        Friends isFriend = friendsServices.findFriend(selfUuid, fUUid); //自己
+
         if (usr == null || usr.equals("")) {
             ajaxResponse.error().setMessage("该用户不存在！");
             return ajaxResponse;
@@ -76,15 +77,18 @@ public class FriendsController {
             }
             return ajaxResponse;
         }
-        Friends target = friendsServices.findFriend(friends.getfUuid(), selfUuid); //对方
+        Friends target = friendsServices.findFriend(fUUid, selfUuid); //对方
         if (target != null && target.getStatus() == 3) {
             return ajaxResponse.error().setMessage("您已被对方拉黑！");
         }
+        friends.setsUuid(selfUuid);
         //己方添加
-        friendsServices.insertByUuid(selfUuid, friends.getfUuid());
+        friendsServices.insertSelective(friends);
         if (target == null) {
-            //对方已添加，不重复插入
-            friendsServices.insertByUuid(friends.getfUuid(), selfUuid);
+            //对方已添加，不重复插入,互换uuid位置
+            friends.setsUuid(fUUid);
+            friends.setfUuid(selfUuid);
+            friendsServices.insertSelective(friends);
         }
         List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
         List users = userServices.selectByFriendsUuidList(uuids, selfUuid);

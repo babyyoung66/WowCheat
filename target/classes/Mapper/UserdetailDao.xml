@@ -11,7 +11,7 @@
         <result column="photoUrl" jdbcType="VARCHAR" property="photourl"/>
         <result column="phoneNum" jdbcType="VARCHAR" property="phonenum"/>
         <result column="email" jdbcType="VARCHAR" property="email"/>
-        <result column="birthday" jdbcType="DATE" property="birthday"/>
+        <result column="birthday"  property="birthday"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
         <result column="creatTime" property="creattime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>

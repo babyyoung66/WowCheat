@@ -9,7 +9,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.sql.Date;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -67,7 +67,7 @@ public class MyUserDetail implements Serializable {
     private String email;
 
     @ApiModelProperty(value = "用户生日")
-    private Date birthday;
+    private String birthday;
 
     @ApiModelProperty(value = "用户地址")
     private String address;
@@ -154,11 +154,11 @@ public class MyUserDetail implements Serializable {
         this.email = email;
     }
 
-    public Date getBirthday() {
+    public String getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(String birthday) {
         this.birthday = birthday;
     }
 

@@ -3,10 +3,10 @@ package com.cinle.wowcheat.Service.Impl;
 import com.cinle.wowcheat.Dao.FriendsDao;
 import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Service.FriendsServices;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,6 +26,8 @@ public class FriendsServicesImpl implements FriendsServices {
 
     @Override
     public int insertSelective(Friends record) {
+        Date now = new Date();
+        record.setLastCheatTime(new java.sql.Date(now.getTime()));
         return friendsDao.insertSelective(record);
     }
 
@@ -57,5 +59,12 @@ public class FriendsServicesImpl implements FriendsServices {
     @Override
     public int updateRemarksByUuid(Friends friends) {
         return friendsDao.updateRemarksByUuid(friends);
+    }
+
+    @Override
+    public int updateLastCheatTime(Friends friends) {
+        Date date = new Date();
+        friends.setLastCheatTime(new java.sql.Date(date.getTime()));
+        return friendsDao.updateLastCheatTime(friends);
     }
 }

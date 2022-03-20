@@ -19,7 +19,9 @@ public enum RoleEnum {
     /**
      * VIP，对应数据库2
      * */
-    VIP("vip",2);
+    VIP("vip",2),
+
+    TEST("test",3);
     private  String name;
     private  int index;
 

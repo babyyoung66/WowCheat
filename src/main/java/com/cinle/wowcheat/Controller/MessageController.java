@@ -25,16 +25,25 @@ public class MessageController {
     @Autowired
     MessageServices messageServices;
 
-    @PostMapping("/get")
+    @PostMapping("/getAll")
     public AjaxResponse getMessageByUUID(@RequestBody Message message) {
-        AjaxResponse ajaxResponse = new AjaxResponse();
+        AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         message.setFrom(uuid);
-        List mess = messageServices.findAllByUUID(message,"personal");
-        return ajaxResponse.success().setData(JSON.toJSON(mess));
+        List personalMess = messageServices.findAllByUUID(message,"personal");
+        //有可能是群聊
+        List GroupMess = messageServices.findAllByUUID(message,"group");
+        if(!personalMess.isEmpty()){
+            response.setData(JSON.toJSON(personalMess));
+        }
+        if(!GroupMess.isEmpty()){
+            response.setData(JSON.toJSON(GroupMess));
+        }
+        return response.success();
 
     }
 
+    //不使用，后期得验证双方关系是否合法
     @PostMapping("/save")
     public AjaxResponse saveMessage(@RequestBody Message message) {
         AjaxResponse response = new AjaxResponse();
@@ -52,9 +61,14 @@ public class MessageController {
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         message.setFrom(uuid);
         AjaxResponse response = new AjaxResponse();
-        List mess = messageServices.findPersonalByPages(message,"personal");
-        if(!mess.isEmpty()){
-            response.setData(JSON.toJSON(mess));
+        List personalMess = messageServices.findPersonalByPages(message,"personal");
+        //有可能是群聊
+        List GroupMess = messageServices.findPersonalByPages(message,"group");
+        if(!personalMess.isEmpty()){
+            response.setData(JSON.toJSON(personalMess));
+        }
+        if(!GroupMess.isEmpty()){
+            response.setData(JSON.toJSON(GroupMess));
         }
         response.success();
         return response;

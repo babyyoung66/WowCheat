@@ -11,11 +11,14 @@ import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Tools.SecurityContextUtils;
 import com.cinle.wowcheat.Tools.UploadUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.annotation.Role;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
@@ -23,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.security.DeclareRoles;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -55,6 +59,7 @@ public class UserController {
      * @param wowId
      * @return
      */
+
     @PostMapping("/queryUser")
     public AjaxResponse queryUserByWowId(String wowId) {
         AjaxResponse ajaxResponse = new AjaxResponse();
@@ -145,7 +150,7 @@ public class UserController {
      * @throws UploadFileException
      */
     @PostMapping("/editPhoto")
-    public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException {
+    public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException, FileUploadException {
         AjaxResponse response = new AjaxResponse();
         //从security上下文获取用户uuid，确保是当前用户操作
         String uuid = SecurityContextUtils.getCurrentUserUUID();
@@ -153,7 +158,7 @@ public class UserController {
         //将旧头像删除
         UploadUtils.removeFile(usr.getPhotourl());
         //上传新头像
-        String name = file.getName();
+        String name = file.getOriginalFilename();
         String ExName = name.substring(name.lastIndexOf("."));       //获取文件后缀
         String uuName = UUID.randomUUID().toString();
         String filePath = "image/" + uuName + ExName;
