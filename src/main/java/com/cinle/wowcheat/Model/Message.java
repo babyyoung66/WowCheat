@@ -1,7 +1,6 @@
 package com.cinle.wowcheat.Model;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 
 import java.util.Date;
@@ -27,14 +26,11 @@ public class Message {
 
     private FileDetail fileDetail;
 
-    /**
-     * 是否读取默认false
-     */
-    private boolean check;
+
 
     //@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JSONField(format="yyyy-MM-dd HH:mm:ss",deserialize=false) //关闭反序列化，不然无法转换类型，使用下边的转换
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
+   @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
+   //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", locale = "zh", timezone = "GMT+8") //混用会出现bug
     private Date time;
 
     private String msgType;
@@ -83,13 +79,6 @@ public class Message {
         return this;
     }
 
-    public boolean isCheck() {
-        return check;
-    }
-
-    public void setCheck(boolean check) {
-        this.check = check;
-    }
 
     public Date getTime() {
         return time;
@@ -127,7 +116,6 @@ public class Message {
                 ", content='" + content + '\'' +
                 ", contentType='" + contentType + '\'' +
                 ", fileDetail=" + fileDetail +
-                ", check=" + check +
                 ", time=" + time +
                 ", msgType='" + msgType + '\'' +
                 '}';
