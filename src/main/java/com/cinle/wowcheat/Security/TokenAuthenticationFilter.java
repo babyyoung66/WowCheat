@@ -2,6 +2,7 @@ package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Enum.RoleEnum;
+import com.cinle.wowcheat.Exception.TokenException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,7 +55,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         response.setContentType("application/json;charset=UTF-8");
-
         UsernamePasswordAuthenticationToken authenticationToken = null;
         try {
             authenticationToken = getAuthentication(request, response);
@@ -62,11 +62,12 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             //e.printStackTrace();
             response.setStatus(401);
             AjaxResponse ajaxResponse = new AjaxResponse();
-            ajaxResponse.error().setMessage("Token处理失败！" + e.getMessage()).setCode(401);
+            ajaxResponse.error().setMessage(  e.getMessage()).setCode(401);
             PrintWriter out = response.getWriter();
             out.println(JSON.toJSONString(ajaxResponse));
             out.flush();
             out.close();
+            return;
         }
         if (authenticationToken != null) {
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);;
@@ -80,8 +81,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
 //        super.doFilterInternal(request, response, chain);
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        AjaxResponse ajaxResponse = new AjaxResponse();
+    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException, TokenException {
         response.setContentType("application/json;charset=UTF-8");
         String token = request.getHeader("token");
         if (!StringUtils.hasText(token)) {
@@ -90,32 +90,8 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         if (StringUtils.hasText(token)) {
-         /*
-            //已交由redis判断
-            boolean isExpires = jwtTokenService.isTokenExpires(token);
-            if (isExpires){
-                response.setStatus(401);
-                ajaxResponse.error().setMessage("Token已过期，请重新登录！").setCode(403);
-                PrintWriter out = response.getWriter();
-                out.println(JSON.toJSONString(ajaxResponse));
-                out.flush();
-                out.close();
-                return null;
-            }*/
-
-            //校验合法性
-            Map info = jwtTokenService.getUserInfoFromToken(token);
-            String uuid = (String) info.get("uuid");
-            boolean isOnRedis = jwtTokenService.CheckTokenByRedis(uuid,token);
-            if (!isOnRedis || info.isEmpty()) {
-                response.setStatus(401);
-                ajaxResponse.error().setMessage("Token失效，请重新登录！").setCode(401);
-                PrintWriter out = response.getWriter();
-                out.println(JSON.toJSONString(ajaxResponse));
-                out.flush();
-                out.close();
-                return null;
-            }
+            //验证是否存在、是否过期，不正常则抛异常
+            jwtTokenService.CheckToken(token);
 
             //是否需要刷新token
             String newToken = jwtTokenService.isNeedFlushToken(token);
@@ -124,7 +100,9 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
                 response.setHeader("newToken", newToken);
                 token = newToken;
             }
-
+            //读取token信息
+            Map info = jwtTokenService.getUserInfoFromToken(token);
+            String uuid = (String) info.get("uuid");
             List<String> roles = (List) info.get("role");
             if (StringUtils.hasText(uuid)) {
                 //List<Role> r = roleServices.selectByUseruid(uuid); //关闭session后每次都会查询MySQL，已弃用

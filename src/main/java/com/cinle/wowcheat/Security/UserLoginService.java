@@ -36,12 +36,15 @@ public class UserLoginService implements UserDetailsService {
         //查找用户权限
         List<String> roles=new ArrayList<>();
         List<Role> r = roleServices.selectByUseruid(customerUserDetails.getUuid());
-
         if (r == null|| r.isEmpty()){
             roles.add(RoleEnum.NORMAL.getName());
         }else {
             for(Role rs : r){
-                roles.add(RoleEnum.getNameByIndex(rs.getRole()));
+                if(rs.getRole() == null || rs.getRole().equals("")){
+                    roles.add(RoleEnum.NORMAL.getName());
+                }else {
+                    roles.add(rs.getRole().getName());
+                }
             }
         }
         customerUserDetails.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList(

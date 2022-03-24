@@ -1,11 +1,9 @@
 package com.cinle.wowcheat.Service.Impl;
 
 import com.cinle.wowcheat.Constants.FileConst;
-import com.cinle.wowcheat.Enum.FileType;
-import com.cinle.wowcheat.GlobalException.UploadFileException;
+import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Service.UploadServices;
-import com.cinle.wowcheat.Tools.SecurityContextUtils;
-import com.cinle.wowcheat.Tools.UploadUtils;
+import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

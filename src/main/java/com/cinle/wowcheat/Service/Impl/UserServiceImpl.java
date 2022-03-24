@@ -5,7 +5,7 @@ import com.cinle.wowcheat.Dao.UserdetailDao;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Security.CustomerUserDetails;
 import com.cinle.wowcheat.Service.UserServices;
-import com.cinle.wowcheat.Tools.DesensitizedUtil;
+import com.cinle.wowcheat.Utils.DesensitizedUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

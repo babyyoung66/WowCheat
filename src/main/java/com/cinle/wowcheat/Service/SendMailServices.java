@@ -4,21 +4,11 @@ import cn.hutool.core.util.RandomUtil;
 import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Enum.MailTypeEnum;
 import com.cinle.wowcheat.Event.SendMailEvent;
-import com.cinle.wowcheat.Tools.SendMailUtils;
 import com.cinle.wowcheat.Vo.MailMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 /**
  * @Author JunLe
