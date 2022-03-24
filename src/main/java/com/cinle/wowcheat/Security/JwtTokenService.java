@@ -7,7 +7,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Enum.RoleEnum;
-import com.cinle.wowcheat.GlobalException.RedisOptionsException;
+import com.cinle.wowcheat.Exception.RedisOptionsException;
+import com.cinle.wowcheat.Exception.TokenException;
 import com.cinle.wowcheat.Model.Role;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.slf4j.Logger;
@@ -50,13 +51,15 @@ public class JwtTokenService {
         String key = KEY_HEAD + uuid;
         String token = JWT.create()
                 .withIssuer(MyConst.TOKEN_ISSUER)
-                .withSubject(uuid) //签名标题
+                .withSubject("WowCheat") //签名标题
+                .withClaim("uuid", uuid)
                 .withClaim("role", role)
                 .withIssuedAt(new Date())  //签名时间
                 .withExpiresAt(new Date(System.currentTimeMillis() + MyConst.TOKEN_Expiration * 1000)) //过期时间
                 .sign(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY));
         //存入redis 7天
         setTokenToRedis(key,token);
+
         return token;
     }
 
@@ -71,7 +74,7 @@ public class JwtTokenService {
 
     }
 
-    public Map getUserInfoFromToken(String token) {
+    public Map getUserInfoFromToken(String token) throws TokenException {
         Map map = new HashMap();
         try {
             //只要密钥不变就能转换，密钥改变则报异常
@@ -79,22 +82,26 @@ public class JwtTokenService {
                     .withIssuer(MyConst.TOKEN_ISSUER)
                     .build();
             DecodedJWT decodedJWT = verifier.verify(token);
-            String uuid = decodedJWT.getSubject();
+            String uuid = decodedJWT.getClaim("uuid").asString();
             List roles = decodedJWT.getClaim("role").asList(String.class);
             map.put("uuid", uuid);
             map.put("role", roles);
         } catch (Exception e) {
             log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
-            throw new JWTVerificationException("token解析失败，请尝试重新登录！");
+            throw new TokenException("token解析失败，请尝试重新登录！");
         }
         return map;
     }
 
-    public boolean CheckTokenByRedis(String uuid, String token) {
+    public void CheckTokenByRedis( String token) throws TokenException {
+        Map map = getUserInfoFromToken(token);
+        String uuid = (String) map.get("uuid");
         String key = KEY_HEAD + uuid;
         String sign = (String) redisTemplate.opsForValue().get(key);
         String tt = sign == null?"_":sign;
-        return tt.equals(token);
+        if (!tt.equals(token)){
+            throw new TokenException("Token不存在，请重新登录！");
+        }
     }
 
     @Async
@@ -109,17 +116,19 @@ public class JwtTokenService {
 
     }
 
-    public boolean CheckToken(String token) {
+    /**
+     * 验证token是否在redis中
+     * 及token是否过期
+     * @param token
+     * @throws TokenException 以抛异常的形式返回
+     */
+    public void CheckToken(String token) throws TokenException {
         try {
-            //只要密钥不变就能转换，密钥改变则报异常
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
-                    .withIssuer(MyConst.TOKEN_ISSUER)
-                    .build();
-            DecodedJWT decodedJWT = verifier.verify(token);
-            return true;
+            CheckTokenByRedis(token);
+            isTokenExpires(token);
         } catch (Exception e) {
-            log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
-            throw new JWTVerificationException("token解析失败，请尝试重新登录！");
+            log.info("Token验证失败! 原因: {}", e.getMessage());
+            throw new TokenException(e.getMessage());
         }
     }
 
@@ -127,7 +136,7 @@ public class JwtTokenService {
      * @param token
      * @return 判断token是否过期
      */
-    public boolean isTokenExpires(String token) {
+    public void isTokenExpires(String token) throws TokenException {
         try {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(MyConst.TOKEN_PRIVATE_KEY))
                     .withIssuer(MyConst.TOKEN_ISSUER)
@@ -136,13 +145,25 @@ public class JwtTokenService {
             Date Expires = decodedJWT.getExpiresAt();
             Date now = new Date();
             //当前时间是否大于过期时间
-            return now.after(Expires);
+            if (now.after(Expires)) {
+                throw new TokenException("Token已过期，请尝试重新登录！");
+            }
         } catch (JWTVerificationException e) {
             log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
-            throw new JWTVerificationException("token解析失败，请尝试重新登录！");
+            throw new TokenException("Token解析失败，请尝试重新登录！");
         }
     }
 
+
+    public String getUserId(String token) throws TokenException {
+        Map map = getUserInfoFromToken(token);
+        return (String) map.get("uuid");
+    }
+
+    public List<String> getUserRoles(String token) throws TokenException {
+        Map map = getUserInfoFromToken(token);
+        return (List<String>) map.get("role");
+    }
 
     /**
      * @param token
@@ -170,7 +191,7 @@ public class JwtTokenService {
                     roles.add(RoleEnum.NORMAL.getName());
                 } else {
                     for (Role rs : r) {
-                        roles.add(RoleEnum.getNameByIndex(rs.getRole()));
+                        roles.add(rs.getRole().getName());
                     }
                 }
                 newToken = createToken(uuid, roles);
@@ -182,4 +203,5 @@ public class JwtTokenService {
         }
         return newToken;
     }
+
 }
