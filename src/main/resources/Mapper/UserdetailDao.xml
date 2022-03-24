@@ -16,9 +16,10 @@
         <result column="creatTime" property="creattime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
 
-        <association property="friendsInfo" javaType="com.cinle.wowcheat.Model.Friends">
+        <association property="concatInfo" javaType="com.cinle.wowcheat.Model.Friends">
             <result column="f_remarks" jdbcType="VARCHAR" property="fRemarks"/>
             <result column="f_status" jdbcType="INTEGER" property="fStatus"/>
+            <result column="lastCheatTime" property="lastCheatTime"/>
         </association>
     </resultMap>
     <sql id="Base_Column_List">
@@ -185,7 +186,7 @@
     </select>
 
     <select id="selectByFriendsUuidList" resultMap="BaseResultMap">
-        select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f_status,f_remarks
+        select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f.f_status,f.f_remarks,f.lastCheatTime
         from wow_userdetail u
         left join wow_friends f on f.f_uuid = u.uuid and f.s_uuid = #{sUuid}
         where u.uuid in

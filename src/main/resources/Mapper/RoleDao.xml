@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="com.cinle.wowcheat.Model.Role">
     <id column="auto_id" jdbcType="INTEGER" property="autoId" />
     <result column="user_uuid" jdbcType="VARCHAR" property="userUuid" />
-    <result column="role" jdbcType="INTEGER" property="role" />
+    <result column="role"  property="role" />
   </resultMap>
   <sql id="Base_Column_List">
     auto_id, user_uuid, `role`
