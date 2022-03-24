@@ -15,8 +15,13 @@ public class FileConst {
     /**
      * 文件上传base地址
      */
-    public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:8080" + ACCESS_PATH;
+    public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
 
+
+    /**
+     * 注册时默认头像路径
+     */
+    public static final String DEFAULT_PHOTO_URL = "../static/cheat.png";
 
     /**
      * 文件上传对应的本地路径
