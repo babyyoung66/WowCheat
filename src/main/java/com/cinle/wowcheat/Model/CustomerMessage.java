@@ -11,7 +11,7 @@ import java.util.Date;
  * @Time 2022/3/3 15:26
  */
 //@Document(collection = "message") //弃用，使用MongoTemplate自定义选择collection
-public class Message {
+public class CustomerMessage {
 
     @Id
     private String _id;
@@ -47,7 +47,7 @@ public class Message {
         return from;
     }
 
-    public Message setFrom(String from) {
+    public CustomerMessage setFrom(String from) {
         this.from = from;
         return this;
     }
@@ -56,7 +56,7 @@ public class Message {
         return to;
     }
 
-    public Message setTo(String to) {
+    public CustomerMessage setTo(String to) {
         this.to = to;
         return this;
     }
@@ -65,7 +65,7 @@ public class Message {
         return content;
     }
 
-    public Message setContent(String content) {
+    public CustomerMessage setContent(String content) {
         this.content = content;
         return this;
     }
@@ -74,7 +74,7 @@ public class Message {
         return contentType;
     }
 
-    public Message setContentType(String contentType) {
+    public CustomerMessage setContentType(String contentType) {
         this.contentType = contentType;
         return this;
     }
@@ -84,7 +84,7 @@ public class Message {
         return time;
     }
 
-    public Message setTime(Date time) {
+    public CustomerMessage setTime(Date time) {
         this.time = time;
         return this;
     }
@@ -93,7 +93,7 @@ public class Message {
         return msgType;
     }
 
-    public Message setMsgType(String msgType) {
+    public CustomerMessage setMsgType(String msgType) {
         this.msgType = msgType;
         return this;
     }
@@ -102,7 +102,7 @@ public class Message {
         return fileDetail;
     }
 
-    public Message setFileDetail(FileDetail fileDetail) {
+    public CustomerMessage setFileDetail(FileDetail fileDetail) {
         this.fileDetail = fileDetail;
         return this;
     }

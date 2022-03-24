@@ -1,11 +1,10 @@
-package com.cinle.wowcheat.GlobalException;
+package com.cinle.wowcheat.Exception;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import com.mongodb.MongoSocketReadTimeoutException;
 import io.lettuce.core.RedisCommandTimeoutException;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -35,7 +33,7 @@ import java.util.Set;
  * RestControllerAdvice 传入对应的注解类
  */
 @RestControllerAdvice(annotations = {RestController.class, Controller.class})
-public class GlobalExceptionDeal {
+public class GlobalExceptionHandler {
 
 
     /**

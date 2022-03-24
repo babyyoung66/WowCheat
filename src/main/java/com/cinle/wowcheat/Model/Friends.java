@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 /**
  * wow_friends
@@ -43,7 +43,14 @@ public class Friends implements Serializable {
      * 上次联系时间
      * */
     @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date lastCheatTime;
+    private LocalDateTime lastCheatTime;
+
+    /**
+     * 未读记录数
+     * 数据库不含该字段
+     * */
+    @JSONField(deserialize = false)
+    private long unReadTotal;
 
     private static final long serialVersionUID = 1L;
 
@@ -92,12 +99,20 @@ public class Friends implements Serializable {
     }
 
 
-    public Date getLastCheatTime() {
+    public LocalDateTime getLastCheatTime() {
         return lastCheatTime;
     }
 
-    public void setLastCheatTime(Date lastCheatTime) {
+    public void setLastCheatTime(LocalDateTime lastCheatTime) {
         this.lastCheatTime = lastCheatTime;
+    }
+
+    public long getUnReadTotal() {
+        return unReadTotal;
+    }
+
+    public void setUnReadTotal(long unReadTotal) {
+        this.unReadTotal = unReadTotal;
     }
 
     @Override
@@ -109,6 +124,7 @@ public class Friends implements Serializable {
                 ", fRemarks='" + fRemarks + '\'' +
                 ", fStatus=" + fStatus +
                 ", lastCheatTime=" + lastCheatTime +
+                ", unReadTotal=" + unReadTotal +
                 '}';
     }
 }

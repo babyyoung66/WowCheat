@@ -1,4 +1,4 @@
-package com.cinle.wowcheat.GlobalException;
+package com.cinle.wowcheat.Exception;
 
 /**
  * @Author JunLe
