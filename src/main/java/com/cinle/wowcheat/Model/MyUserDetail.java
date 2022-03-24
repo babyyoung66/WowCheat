@@ -78,7 +78,10 @@ public class MyUserDetail implements Serializable {
     @ApiModelProperty(value = "账号状态，1正常，2限制登录")
     private Integer status;
 
-    private Friends friendsInfo;
+    /**
+     * 多表查询字段
+     * */
+    private Friends concatInfo;
 
     private static final long serialVersionUID = 1L;
 
@@ -186,12 +189,12 @@ public class MyUserDetail implements Serializable {
         this.status = status;
     }
 
-    public Friends getFriendsInfo() {
-        return friendsInfo;
+    public Friends getConcatInfo() {
+        return concatInfo;
     }
 
-    public void setFriendsInfo(Friends friendsInfo) {
-        this.friendsInfo = friendsInfo;
+    public void setConcatInfo(Friends concatInfo) {
+        this.concatInfo = concatInfo;
     }
 
     public static long getSerialVersionUID() {
@@ -214,7 +217,7 @@ public class MyUserDetail implements Serializable {
                 ", address='" + address + '\'' +
                 ", creattime=" + creattime +
                 ", status=" + status +
-                ", friendsInfo=" + friendsInfo +
+                ", concatInfo=" + concatInfo +
                 '}';
     }
 
