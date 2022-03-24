@@ -5,8 +5,9 @@ import com.cinle.wowcheat.Enum.CheatStatus;
 import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
+import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Service.UserServices;
-import com.cinle.wowcheat.Tools.SecurityContextUtils;
+import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,7 +36,8 @@ public class FriendsController {
     FriendsServices friendsServices;
     @Autowired
     UserServices userServices;
-
+    @Autowired
+    MessageServices messageServices;
 
     /**
      * 根据当前请求用户获取
@@ -44,7 +50,19 @@ public class FriendsController {
         //从security上下文获取请求者信息
         String selfUuid = SecurityContextUtils.getCurrentUserUUID();
         List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
-        List users = userServices.selectByFriendsUuidList(uuids, selfUuid);
+        List<MyUserDetail> users = userServices.selectByFriendsUuidList(uuids, selfUuid);
+        Iterator<MyUserDetail> it = users.iterator();
+        int i = 0;
+        while (it.hasNext()){
+            MyUserDetail friend = it.next();
+            //localDateTime转date
+            Date date = Date.from(friend.getConcatInfo().getLastCheatTime().atZone(ZoneId.systemDefault()).toInstant());
+            Timestamp time = new Timestamp(date.getTime());
+            long total = messageServices.getPersonalUnReadTotal(friend.getUuid(),selfUuid,time,"personal");
+            users.get(i).getConcatInfo().setUnReadTotal(total);
+            i++;
+        }
+
         //转一遍string再再转会数组是为了去掉null的字段 JSON.parseArray(JSON.toJSONString(users))
         AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
         return ajaxResponse;
@@ -156,6 +174,25 @@ public class FriendsController {
         List<String> uuids = friendsServices.selectFriendUuidList(shelf);
         List users = userServices.selectByFriendsUuidList(uuids, shelf);
         return ajaxResponse.success().setMessage("更改成功！").setData(JSON.toJSON(users));
+    }
+
+    /**
+     * 更新最后联系时间
+     * @param uuid 好友uuid
+     * @return
+     */
+    @PostMapping("/UpdateConcatTime")
+    public AjaxResponse upDateLastCheatTime( String uuid){
+        AjaxResponse response = new AjaxResponse();
+        String selfUuid = SecurityContextUtils.getCurrentUserUUID();
+        Friends friends = new Friends();
+        friends.setsUuid(selfUuid);
+        friends.setfUuid(uuid);
+        int rst = friendsServices.updateLastCheatTime(friends);
+        if (rst <= 0){
+            return response.error().setMessage("修改好友联系时间失败！");
+        }
+        return  response.success().setMessage("更改成功！");
     }
 
 }
