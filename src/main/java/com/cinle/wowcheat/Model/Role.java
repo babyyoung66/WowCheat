@@ -1,5 +1,7 @@
 package com.cinle.wowcheat.Model;
 
+import com.cinle.wowcheat.Enum.RoleEnum;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +13,7 @@ public class Role implements Serializable {
 
     private String userUuid;
 
-    private Integer role;
+    private RoleEnum role;
 
     private static final long serialVersionUID = 1L;
 
@@ -31,11 +33,11 @@ public class Role implements Serializable {
         this.userUuid = userUuid;
     }
 
-    public Integer getRole() {
+    public RoleEnum getRole() {
         return role;
     }
 
-    public void setRole(Integer Role) {
+    public void setRole(RoleEnum Role) {
         this.role = Role;
     }
 
