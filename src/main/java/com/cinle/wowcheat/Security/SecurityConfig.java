@@ -3,6 +3,7 @@ package com.cinle.wowcheat.Security;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Service.RoleServices;
+import com.cinle.wowcheat.WebSocket.SocketConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,9 +45,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/register/*", "/auth/*").permitAll()
+                .antMatchers("/register/**", "/auth/**").permitAll()
                 //放行swagger
-                .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/swagger-ui/*").permitAll()
+                .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/**", "/api/**", "/swagger-ui/**").permitAll()
+                //放行websocket
+                .antMatchers(SocketConstants.CONNECT_PATH + "/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().authenticated()
                 // .access("@checkRoles.hasPermission(request,authentication)")
@@ -59,16 +62,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .cors(Customizer.withDefaults())//Customizer.withDefaults(),前后端分离JSON登录必须加该内容
                 .csrf().disable()
-
-
-
         ;
+
+        //关闭stomp的frame验证
+        http.headers().frameOptions().disable();
         http.addFilterAt(CustomerUsernamePasswordFilter(), UsernamePasswordAuthenticationFilter.class); /*自定义获取JSON账号密码方法*/
 
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.NEVER); //开启或关闭session，使用token时可以关闭
 
-        ;
+
 
         /*退出相关*/
         http.logout()
@@ -104,7 +107,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //放行静态资源
-        web.ignoring().antMatchers("classpath:/css/**", "/static/**", FileConst.ACCESS_PATH + "**");
+        web.ignoring().antMatchers( FileConst.ACCESS_PATH + "**")
+                       .antMatchers(SocketConstants.CONNECT_PATH + "/**") ;
     }
 
     /**
