@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Event;
 
 import com.cinle.wowcheat.Enum.MailTypeEnum;
-import com.cinle.wowcheat.Tools.SendMailUtils;
+import com.cinle.wowcheat.Utils.SendMailUtils;
 import com.cinle.wowcheat.Vo.MailMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;

@@ -4,33 +4,26 @@ import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Enum.FileType;
 import com.cinle.wowcheat.Event.UserChangeEvent;
-import com.cinle.wowcheat.GlobalException.UploadFileException;
+import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.UserServices;
-import com.cinle.wowcheat.Tools.SecurityContextUtils;
-import com.cinle.wowcheat.Tools.UploadUtils;
+import com.cinle.wowcheat.Utils.SecurityContextUtils;
+import com.cinle.wowcheat.Utils.UploadUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.annotation.Role;
-import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.security.DeclareRoles;
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import java.util.Map;
 import java.util.UUID;
 
 /**

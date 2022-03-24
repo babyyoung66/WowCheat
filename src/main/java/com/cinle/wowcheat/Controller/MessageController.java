@@ -1,9 +1,9 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
-import com.cinle.wowcheat.Model.Message;
+import com.cinle.wowcheat.Model.CustomerMessage;
 import com.cinle.wowcheat.Service.MessageServices;
-import com.cinle.wowcheat.Tools.SecurityContextUtils;
+import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,13 +26,13 @@ public class MessageController {
     MessageServices messageServices;
 
     @PostMapping("/getAll")
-    public AjaxResponse getMessageByUUID(@RequestBody Message message) {
+    public AjaxResponse getMessageByUUID(@RequestBody CustomerMessage customerMessage) {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
-        message.setFrom(uuid);
-        List personalMess = messageServices.findAllByUUID(message,"personal");
+        customerMessage.setFrom(uuid);
+        List personalMess = messageServices.findAllByUUID(customerMessage,"personal");
         //有可能是群聊
-        List GroupMess = messageServices.findAllByUUID(message,"group");
+        List GroupMess = messageServices.findAllByUUID(customerMessage,"group");
         if(!personalMess.isEmpty()){
             response.setData(JSON.toJSON(personalMess));
         }
@@ -46,11 +45,11 @@ public class MessageController {
 
     //不使用，后期得验证双方关系是否合法
     @PostMapping("/save")
-    public AjaxResponse saveMessage(@RequestBody Message message) {
+    public AjaxResponse saveMessage(@RequestBody CustomerMessage customerMessage) {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
-        message.setFrom(uuid);
-        int result = messageServices.saveMessage(message,"personal");
+        customerMessage.setFrom(uuid);
+        int result = messageServices.saveMessage(customerMessage,"personal");
         if (result > 0) {
             return response.success().setMessage("保存成功！");
         }
@@ -58,13 +57,13 @@ public class MessageController {
     }
 
     @PostMapping("/getByPage")
-    public AjaxResponse getByPages(@RequestBody Message message) throws ParseException {
+    public AjaxResponse getByPages(@RequestBody CustomerMessage customerMessage) throws ParseException {
         String uuid = SecurityContextUtils.getCurrentUserUUID();
-        message.setFrom(uuid);
+        customerMessage.setFrom(uuid);
         AjaxResponse response = new AjaxResponse();
-        List personalMess = messageServices.findMessageByPages(message,"personal");
+        List personalMess = messageServices.findMessageByPages(customerMessage,"personal");
         //有可能是群聊
-        List GroupMess = messageServices.findMessageByPages(message,"group");
+        List GroupMess = messageServices.findMessageByPages(customerMessage,"group");
         if(!personalMess.isEmpty()){
             response.setData(JSON.toJSON(personalMess));
         }

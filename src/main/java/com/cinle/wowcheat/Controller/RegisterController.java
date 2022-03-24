@@ -1,7 +1,8 @@
 package com.cinle.wowcheat.Controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.cinle.wowcheat.GlobalException.GlobalExceptionDeal;
+import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Exception.GlobalExceptionHandler;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.SendMailServices;
 import com.cinle.wowcheat.Service.UserServices;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -47,20 +47,20 @@ public class RegisterController {
     /**
      * @param user 用户JSON
      * @return 注册信息
-     * @see GlobalExceptionDeal 注册失败信息已全局捕获
+     * @see GlobalExceptionHandler 注册失败信息已全局捕获
      */
     @ApiOperation(value = "提交注册信息",notes = "")
     @PostMapping("/")
     public AjaxResponse userRegister(@RequestBody @Valid MyUserDetail user) {
-
         AjaxResponse ajaxResponse = new AjaxResponse();
         List<MyUserDetail> list =  userServices.selectByWowIdOrEmail(user);
-        System.out.println();
         if (!list.isEmpty() ||list.size()>0){
             return ajaxResponse.error().setMessage("id或邮箱已被注册!");
         }
         /* 邮箱验证，验证通过则放行*/
         if (verifyService.isEmailCheckSuccess(user.getEmail())){
+            //设置默认头像
+            user.setPhotourl(FileConst.DEFAULT_PHOTO_URL);
             userServices.insertSelective(user);
             return ajaxResponse.success().setMessage("注册成功!");
         }
