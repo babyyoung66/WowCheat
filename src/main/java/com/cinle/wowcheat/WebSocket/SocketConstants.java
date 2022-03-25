@@ -38,4 +38,10 @@ public class SocketConstants {
      * 即发送消息api前缀
      */
     public static final String ApplicationDestinationPrefixes = "/socket";
+
+
+    /**
+     * 限制消息长度
+     */
+    public static int CONTENT_LIMIT = 200;
 }
