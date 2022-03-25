@@ -27,8 +27,6 @@ public class CustomerMessage {
     private FileDetail fileDetail;
 
 
-
-    //@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
    @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", locale = "zh", timezone = "GMT+8") //混用会出现bug
     private Date time;
