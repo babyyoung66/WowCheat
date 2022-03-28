@@ -17,5 +17,4 @@ public class MessageConst {
      */
     public static final int Page_Num = 40;
 
-
 }
