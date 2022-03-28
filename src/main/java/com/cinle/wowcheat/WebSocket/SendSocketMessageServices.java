@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.WebSocket;
 
 import com.cinle.wowcheat.Model.CustomerMessage;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -17,5 +18,7 @@ public interface SendSocketMessageServices {
     void sendToGroup(SocketUserPrincipal principal,CustomerMessage customerMessage);
 
     void sendTopic(SocketUserPrincipal principal,CustomerMessage customerMessage);
+
+    void sendFile(SocketUserPrincipal principal, CustomerMessage customerMessage, MultipartFile file);
 
 }
