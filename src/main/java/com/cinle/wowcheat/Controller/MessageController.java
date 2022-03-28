@@ -1,22 +1,33 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.Constants.MessageConst;
+import com.cinle.wowcheat.Enum.FileType;
+import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.CustomerMessage;
+import com.cinle.wowcheat.Model.FileDetail;
 import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
+import com.cinle.wowcheat.Utils.UploadUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import com.cinle.wowcheat.WebSocket.SendSocketMessageServices;
+import com.cinle.wowcheat.WebSocket.SocketUserPrincipal;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.text.ParseException;
 import java.util.List;
 
 /**
  * @Author JunLe
  * @Time 2022/3/4 17:43
+ * 非文本类消息发送、消息记录查询
+ * @see MessageConst 消息查询相关静态参数
+ *
  */
 @RestController
 @RequestMapping("/message")
@@ -24,6 +35,9 @@ public class MessageController {
 
     @Autowired
     MessageServices messageServices;
+
+    @Autowired
+    SendSocketMessageServices socketMessageServices;
 
     @PostMapping("/getAll")
     public AjaxResponse getMessageByUUID(@RequestBody CustomerMessage customerMessage) {
@@ -43,7 +57,12 @@ public class MessageController {
 
     }
 
-    //不使用，后期得验证双方关系是否合法
+
+    /**
+     * 暂时没用
+     * @param customerMessage
+     * @return
+     */
     @PostMapping("/save")
     public AjaxResponse saveMessage(@RequestBody CustomerMessage customerMessage) {
         AjaxResponse response = new AjaxResponse();
@@ -56,8 +75,14 @@ public class MessageController {
         return response.error().setMessage("保存失败！");
     }
 
+    /**
+     * 分页获取消息记录
+     * @see MessageConst
+     * @param customerMessage
+     * @return
+     */
     @PostMapping("/getByPage")
-    public AjaxResponse getByPages(@RequestBody CustomerMessage customerMessage) throws ParseException {
+    public AjaxResponse getByPages(@RequestBody CustomerMessage customerMessage) {
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         customerMessage.setFrom(uuid);
         AjaxResponse response = new AjaxResponse();
@@ -72,5 +97,36 @@ public class MessageController {
         }
         response.success();
         return response;
+    }
+
+
+    /**
+     * @param file
+     */
+    @PostMapping("/sendImage")
+    public AjaxResponse sendImage(MultipartFile file, CustomerMessage message) throws UploadFileException {
+        System.out.println("message = " + message);
+        AjaxResponse response = new AjaxResponse();
+        FileDetail fileDetail = new FileDetail();
+        message.setFileDetail(fileDetail);
+        boolean checkType = UploadUtils.checkFileType(file,FileType.image);
+        if (!checkType){
+            return response.error().setCode(501).setMessage("不允许上传该类型文件!");
+        }
+        String fileName = file.getOriginalFilename();
+        if (fileName.length()>240){
+            return response.error().setCode(501).setMessage("小伙子，你这文件名也太长了吧~~不得超过200个字符哟！");
+        }
+
+        SocketUserPrincipal principal = new SocketUserPrincipal();
+        principal.setName(SecurityContextUtils.getCurrentUserUUID());
+        message.getFileDetail().setFileType(FileType.image);
+        try {
+            socketMessageServices.sendFile(principal,message,file);
+        }catch (Exception e){
+            e.printStackTrace();
+            return response.error().setCode(505).setMessage(e.getMessage());
+        }
+        return response.success();
     }
 }
