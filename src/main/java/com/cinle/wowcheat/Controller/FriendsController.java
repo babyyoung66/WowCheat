@@ -56,15 +56,13 @@ public class FriendsController {
         while (it.hasNext()){
             MyUserDetail friend = it.next();
             //localDateTime转date
-            Date date = Date.from(friend.getConcatInfo().getLastCheatTime().atZone(ZoneId.systemDefault()).toInstant());
-            Timestamp time = new Timestamp(date.getTime());
+            Timestamp time = friend.getConcatInfo().getLastCheatTime();
             long total = messageServices.getPersonalUnReadTotal(friend.getUuid(),selfUuid,time,"personal");
             users.get(i).getConcatInfo().setUnReadTotal(total);
             i++;
         }
 
-        //转一遍string再再转会数组是为了去掉null的字段 JSON.parseArray(JSON.toJSONString(users))
-        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
+        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(users);
         return ajaxResponse;
     }
 
