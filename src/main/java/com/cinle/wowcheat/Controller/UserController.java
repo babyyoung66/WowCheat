@@ -145,16 +145,19 @@ public class UserController {
     @PostMapping("/editPhoto")
     public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException, FileUploadException {
         AjaxResponse response = new AjaxResponse();
-        //从security上下文获取用户uuid，确保是当前用户操作
         String uuid = SecurityContextUtils.getCurrentUserUUID();
+        boolean checkType = UploadUtils.checkFileType(file,FileType.image);
+        if (!checkType){
+            return response.error().setCode(501).setMessage("不允许上传该类型文件!");
+        }
         MyUserDetail usr = userServices.selectByUUID(uuid);
         //将旧头像删除
         UploadUtils.removeFile(usr.getPhotourl());
         //上传新头像
         String name = file.getOriginalFilename();
-        String ExName = name.substring(name.lastIndexOf("."));       //获取文件后缀
+        String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
         String uuName = UUID.randomUUID().toString();
-        String filePath = "image/" + uuName + ExName;
+        String filePath = FileConst.IMAGE_PATH + uuName + suffixName;
         UploadUtils.uploadFile(file, filePath, FileType.image);
         //存入数据库
         MyUserDetail newInfo = new MyUserDetail();
