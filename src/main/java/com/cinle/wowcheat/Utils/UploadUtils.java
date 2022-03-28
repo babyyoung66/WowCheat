@@ -10,9 +10,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @Author JunLe
@@ -20,6 +22,10 @@ import java.nio.file.Paths;
  */
 public class UploadUtils {
     private static Logger log = LoggerFactory.getLogger(UploadUtils.class);
+    private static List<String> ImageType = new ArrayList<>(Arrays.asList(".jpg",".jfif",".jpeg",".png","jpg",".tif",".gif",".svg",".bmp",".webp"));
+    private static List<String> VideoType = new ArrayList<>(Arrays.asList(".avi",".wmv",".mpeg",".mp4",".m4v",".mov",".asf",".flv",".f4v",".rmvb",".mkv"));
+    private static List<String> SoundType = new ArrayList<>(Arrays.asList(".cd",".mp3",".wave",".aiff",".mpeg",".midi",".wma",".vqf",".arm",".ape",".aac",".amr",".ra",".ram"));
+
 
     private static boolean cheekSize(long fileSize, FileType type) {
         long size = getLimitSizeByType(type);
@@ -56,7 +62,7 @@ public class UploadUtils {
         if ("K".equals(unit.toUpperCase())) {
             return 1024;
         } else if ("M".equals(unit.toUpperCase())) {
-            return 1048576;
+            return 10485760;
         } else if ("G".equals(unit.toUpperCase())) {
             return 1073741824;
         }
@@ -83,18 +89,29 @@ public class UploadUtils {
     }
 
     public static void uploadFile(MultipartFile file, String filePath, FileType type) throws UploadFileException {
+        if (file == null){
+            throw new UploadFileException("请选择文件！");
+        }
         Path path = Paths.get(FileConst.LOCAL_PATH + filePath);
         boolean checkSize = cheekSize(file.getSize(), type);
         if (!checkSize) {
             throw new UploadFileException(getLimitString(type) + "!");
         }
         try {
+            //父目录不存在则创建父目录
+            if(!path.toFile().getParentFile().exists()){
+                path.toFile().getParentFile().mkdirs();
+            }
             file.transferTo(path);
 
-        } catch (IOException e) {
-            log.info("文件上传失败,文件名: {},上传者: {},失败原因: {}", filePath, SecurityContextUtils.getCurrentUserUUID(), e.getMessage());
-            // e.printStackTrace();
-            throw new UploadFileException("文件上传失败！\n" + e.getMessage());
+        } catch (Exception e) {
+            String error = e.getMessage();
+            if (e instanceof NoSuchFileException){
+                error = "文件或文件路径不存在!";
+            }
+            log.info("文件上传失败,文件名: {},上传者: {},失败原因: {}", file.getOriginalFilename(), SecurityContextUtils.getCurrentUserUUID(), error);
+            e.printStackTrace();
+            throw new UploadFileException("文件上传失败！\n" + error);
         }
     }
 
@@ -114,5 +131,31 @@ public class UploadUtils {
             }
 
         }
+    }
+
+    public static boolean checkFileType(MultipartFile file,FileType type) throws UploadFileException {
+        if (file == null){
+            throw new UploadFileException("请选择文件！");
+        }
+        String name = file.getOriginalFilename();
+        String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
+        String suffix = suffixName.toLowerCase();
+        if (FileType.image.equals(type)){
+            return ImageType.contains(suffix);
+        }
+        if (FileType.video.equals(type)){
+            return VideoType.contains(suffix);
+        }
+        if (FileType.sound.equals(type)){
+            return SoundType.contains(suffix);
+        }
+        if (FileType.file.equals(type)){
+            return true;
+        }
+        return false;
+    }
+
+    public static String getCheatFilesPath(String uuid,String fileName){
+        return FileConst.CHEAT_FILES_PATH + uuid+ "/" + fileName;
     }
 }
