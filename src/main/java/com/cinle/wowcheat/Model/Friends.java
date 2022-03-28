@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 /**
@@ -43,7 +44,7 @@ public class Friends implements Serializable {
      * 上次联系时间
      * */
     @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
-    private LocalDateTime lastCheatTime;
+    private Timestamp lastCheatTime;
 
     /**
      * 未读记录数
@@ -99,11 +100,11 @@ public class Friends implements Serializable {
     }
 
 
-    public LocalDateTime getLastCheatTime() {
+    public Timestamp getLastCheatTime() {
         return lastCheatTime;
     }
 
-    public void setLastCheatTime(LocalDateTime lastCheatTime) {
+    public void setLastCheatTime(Timestamp lastCheatTime) {
         this.lastCheatTime = lastCheatTime;
     }
 

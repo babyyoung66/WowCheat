@@ -6,6 +6,7 @@ import com.cinle.wowcheat.Service.FriendsServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +28,7 @@ public class FriendsServicesImpl implements FriendsServices {
 
     @Override
     public int insertSelective(Friends record) {
-        LocalDateTime now = LocalDateTime.now();
+        Timestamp now =new Timestamp(new Date().getTime());
         record.setLastCheatTime(now);
         return friendsDao.insertSelective(record);
     }
@@ -64,8 +65,8 @@ public class FriendsServicesImpl implements FriendsServices {
 
     @Override
     public int updateLastCheatTime(Friends record) {
-        LocalDateTime now = LocalDateTime.now();
-        record.setLastCheatTime(now);
+        Timestamp timestamp = new Timestamp(new Date().getTime());
+        record.setLastCheatTime(timestamp);
         return friendsDao.updateLastCheatTime(record);
     }
 }
