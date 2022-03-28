@@ -57,7 +57,7 @@ public class MessageServices {
      * 传入前一次查询的最早的一条记录
      * 以该条记录的时间作为查询的结束范围
      */
-    public List<CustomerMessage> findMessageByPages(CustomerMessage customerMessage, String collectionName) throws ParseException {
+    public List<CustomerMessage> findMessageByPages(CustomerMessage customerMessage, String collectionName) {
         Date date;
         //时间为空则默认当前时间
         if (customerMessage.getTime() ==null || customerMessage.getTime().equals("")){
@@ -125,7 +125,7 @@ public class MessageServices {
         Query query = new Query(
                 Criteria.where("to").is(toUuid) //请求者
                         .and("from").is(fromUuid)
-                        .and("time").gte(getQueryStartTime()).gte(time)
+                        .and("time").gte(time)
         );
         return mongoTemplate.count(query,collectionName);
     }
