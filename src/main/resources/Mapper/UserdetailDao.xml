@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cinle.wowcheat.Dao.UserdetailDao">
+<!--  开启缓存  -->
+    <cache></cache>
     <resultMap id="BaseResultMap" type="com.cinle.wowcheat.Model.MyUserDetail">
         <id column="auto_id" jdbcType="INTEGER" property="autoId"/>
         <result column="uuid" jdbcType="VARCHAR" property="uuid"/>
@@ -116,7 +118,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByUUIDSelective" parameterType="com.cinle.wowcheat.Model.MyUserDetail">
+    <update id="updateByUUIDSelective" parameterType="com.cinle.wowcheat.Model.MyUserDetail" flushCache="true">
         update wow_userdetail
         <set>
 
@@ -152,9 +154,9 @@
             </if>
         </set>
         where uuid = #{uuid}
-    </update>
+    </update >
 
-    <select id="findForLogin" resultType="com.cinle.wowcheat.Security.CustomerUserDetails">
+    <select useCache="false" id="findForLogin" resultType="com.cinle.wowcheat.Security.CustomerUserDetails">
         select
         <include refid="Base_Column_List"></include>
         from wow_userdetail
@@ -185,7 +187,7 @@
         </where>
     </select>
 
-    <select id="selectByFriendsUuidList" resultMap="BaseResultMap">
+    <select useCache="false" id="selectByFriendsUuidList" resultMap="BaseResultMap">
         select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f.f_status,f.f_remarks,f.lastCheatTime
         from wow_userdetail u
         left join wow_friends f on f.f_uuid = u.uuid and f.s_uuid = #{sUuid}
