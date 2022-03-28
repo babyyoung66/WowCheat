@@ -22,8 +22,8 @@ public class WebSocketController {
     SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/sendMessage")
-    public void test(SocketUserPrincipal principal , CustomerMessage message){
-
+    public void sendMessage(SocketUserPrincipal principal , CustomerMessage message){
+        message.setContentType("text");
         if ("personal".equals(message.getMsgType())){
             socketMessageServices.sendToUser(principal,message);
         }
