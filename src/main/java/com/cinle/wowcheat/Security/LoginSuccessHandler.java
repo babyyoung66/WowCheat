@@ -59,7 +59,8 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
             Map map = new HashMap();
             map.put("token",token);
             map.put("user",userDetail);
-            response.getWriter().write(JSON.toJSONString(ajaxResponse.success().setMessage("登录成功!").setData(map)));
+            ajaxResponse.success().setMessage("登录成功!").setData(map);
+            response.getWriter().write(JSON.toJSONString(ajaxResponse));
             response.getWriter().flush();
             response.getWriter().close();
             log.info("用户uuid: {} 已从主机 {}:{} 登录服务......",userDetail.getUuid(),request.getRemoteHost(),request.getRemotePort());
