@@ -35,4 +35,11 @@ public class FileConst {
     public static final String SIZE_VIDEO = "200M";
 
     public static final String SIZE_SOUND = "30M";
+
+    public static final String IMAGE_PATH = "image/";
+
+    /**
+     * 聊天文件存放根路径
+     */
+    public static final String CHEAT_FILES_PATH = "cheatFiles/";
 }
