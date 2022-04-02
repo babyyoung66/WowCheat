@@ -44,4 +44,15 @@ public class SocketConstants {
      * 限制消息长度
      */
     public static int CONTENT_LIMIT = 200;
+
+
+    /**
+     * 消息数记录间隔
+     */
+    public static long LIMIT_SECOND = 60 * 1000;
+
+    /**
+     * LIMIT_SECOND 时间内允许发送的消息数量
+     */
+    public static int LIMIT_TOTAL = 10;
 }

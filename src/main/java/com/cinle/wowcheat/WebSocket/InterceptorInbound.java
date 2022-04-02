@@ -5,23 +5,17 @@ import com.cinle.wowcheat.Security.JwtTokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,13 +25,13 @@ import java.util.List;
  * 执行顺序preSend(入站时) => postSend(发送消息时) => afterSendCompletion(处理完成时)
  */
 @Component
-public class InboundInterceptor implements ChannelInterceptor {
+public class InterceptorInbound implements ChannelInterceptor {
 
     @Autowired
     JwtTokenService tokenService;
 
 
-    private Logger log = LoggerFactory.getLogger(InboundInterceptor.class);
+    private Logger log = LoggerFactory.getLogger(InterceptorInbound.class);
 
     /**
      * preSend里当连接方式为CONNECT的时候获取用户认证信息
@@ -48,9 +42,8 @@ public class InboundInterceptor implements ChannelInterceptor {
         //连接时
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             try {
-                Principal user = getUserPrincipal(accessor);
+                SocketUserPrincipal user = getUserPrincipal(accessor);
                 accessor.setUser(user);
-
                 return message;
             } catch (TokenException e) {
                 //token解析失败
@@ -60,7 +53,7 @@ public class InboundInterceptor implements ChannelInterceptor {
 
         //断开时
         if (accessor != null && accessor.getUser() != null  && StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-            log.info(accessor.getUser().getName() + "已断开websocket服务..." );
+            //log.info(accessor.getUser().getName() + "已断开websocket服务..." );
             //移除在线信息
             return null;
         }
@@ -73,7 +66,7 @@ public class InboundInterceptor implements ChannelInterceptor {
             String userDes = SocketConstants.USER_SUBSCRIBE_Prefix + userName + SocketConstants.USER_SUBSCRIBE_Suffix;
             //不能订阅除自己id和topic外的链接
             if (userDes.equals(Destination) || SocketConstants.TOPIC_SUBSCRIBE.equals(Destination)) {
-                log.info("用户: {} 成功订阅: {}", accessor.getUser().getName(), accessor.getDestination());
+                //log.info("用户: {} 成功订阅: {}", accessor.getUser().getName(), accessor.getDestination());
                 return message;
             } else {
                 // 如果该用户订阅的频道不合法直接返回null前端用户就接受不到该频道信息
@@ -82,7 +75,13 @@ public class InboundInterceptor implements ChannelInterceptor {
             }
 
         }
-
+        //发送时，检查时间间隔
+        if (accessor != null && StompCommand.SEND.equals(accessor.getCommand())) {
+            SocketUserPrincipal userPrincipal = (SocketUserPrincipal) accessor.getUser();
+            //更新消息
+            SocketUserPrincipal user = CheckLimitUtils.checkLimit(userPrincipal);
+            accessor.setUser(user);
+        }
 
         return message;
     }
@@ -94,7 +93,7 @@ public class InboundInterceptor implements ChannelInterceptor {
      * @return
      * @throws TokenException
      */
-    private Principal getUserPrincipal(StompHeaderAccessor accessor) throws TokenException {
+    private SocketUserPrincipal getUserPrincipal(StompHeaderAccessor accessor) throws TokenException {
         //获取token
         List<String> nativeHeader = accessor.getNativeHeader("token");
         if (nativeHeader != null && !nativeHeader.isEmpty()) {
@@ -115,13 +114,22 @@ public class InboundInterceptor implements ChannelInterceptor {
             //没有token请求头则从验证体principal获取token
             SocketUserPrincipal principal = (SocketUserPrincipal) accessor.getUser();
             tokenService.CheckToken(principal.getToken());
-            return accessor.getUser();
+            return (SocketUserPrincipal) accessor.getUser();
         }
 
         return null;
     }
-    //放行的类型
+
+    /**
+     * 放行的连接类型
+     */
     private List ignoreCommand = new ArrayList(Arrays.asList(StompCommand.CONNECT,StompCommand.ERROR,StompCommand.DISCONNECT,StompCommand.UNSUBSCRIBE));
+
+    /**
+     * @param message
+     * @param channel
+     * @param sent
+     */
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -129,7 +137,7 @@ public class InboundInterceptor implements ChannelInterceptor {
         if (!ignoreCommand.contains(accessor.getCommand())) {
             try {
                 //发送前再次判断token是否正常
-                Principal principal = getUserPrincipal(accessor);
+                SocketUserPrincipal principal = getUserPrincipal(accessor);
             } catch (TokenException e) {
                 accessor.setUser(null);
                 //throw new IllegalArgumentException(e.getMessage());

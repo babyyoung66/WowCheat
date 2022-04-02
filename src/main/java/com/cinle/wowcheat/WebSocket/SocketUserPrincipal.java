@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.WebSocket;
 import java.security.Principal;
+import java.util.Date;
 import java.util.List;
 
 
@@ -27,6 +28,16 @@ public class SocketUserPrincipal implements Principal {
      */
     private List<String> roles;
 
+    /**
+     * 上次发送时间
+     */
+    private Date lastSendTime;
+
+    /**
+     * 间隔时间内的消息记录数
+     */
+    private int limitTotal;
+
     public String getToken() {
         return token;
     }
@@ -53,12 +64,30 @@ public class SocketUserPrincipal implements Principal {
         this.roles = roles;
     }
 
+    public Date getLastSendTime() {
+        return lastSendTime;
+    }
+
+    public void setLastSendTime(Date lastSend) {
+        this.lastSendTime = lastSend;
+    }
+
+    public int getLimitTotal() {
+        return limitTotal;
+    }
+
+    public void setLimitTotal(int limitTotal) {
+        this.limitTotal = limitTotal;
+    }
+
     @Override
     public String toString() {
         return "SocketUserPrincipal{" +
                 "token='" + token + '\'' +
                 ", name='" + name + '\'' +
                 ", roles=" + roles +
+                ", lastSendTime=" + lastSendTime +
+                ", limitTotal=" + limitTotal +
                 '}';
     }
 }
