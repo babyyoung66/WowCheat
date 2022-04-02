@@ -21,6 +21,9 @@ import java.util.List;
  * @Time 2022/3/5 20:17
  */
 public class UploadUtils {
+    private UploadUtils() {
+    }
+
     private static Logger log = LoggerFactory.getLogger(UploadUtils.class);
     private static List<String> ImageType = new ArrayList<>(Arrays.asList(".jpg",".jfif",".jpeg",".png","jpg",".tif",".gif",".svg",".bmp",".webp"));
     private static List<String> VideoType = new ArrayList<>(Arrays.asList(".avi",".wmv",".mpeg",".mp4",".m4v",".mov",".asf",".flv",".f4v",".rmvb",".mkv"));
@@ -92,6 +95,8 @@ public class UploadUtils {
         if (file == null){
             throw new UploadFileException("请选择文件！");
         }
+        String suffixName = filePath.substring(filePath.lastIndexOf("."));
+
         Path path = Paths.get(FileConst.LOCAL_PATH + filePath);
         boolean checkSize = cheekSize(file.getSize(), type);
         if (!checkSize) {
@@ -109,7 +114,7 @@ public class UploadUtils {
             if (e instanceof NoSuchFileException){
                 error = "文件或文件路径不存在!";
             }
-            log.info("文件上传失败,文件名: {},上传者: {},失败原因: {}", file.getOriginalFilename(), SecurityContextUtils.getCurrentUserUUID(), error);
+            log.error("文件上传失败,文件名: {},上传者: {},失败原因: {}", file.getOriginalFilename(), SecurityContextUtils.getCurrentUserUUID(), error);
             e.printStackTrace();
             throw new UploadFileException("文件上传失败！\n" + error);
         }
