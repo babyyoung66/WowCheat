@@ -3,7 +3,9 @@ package com.cinle.wowcheat.WebSocket;
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Dao.UserFileDetailDao;
+import com.cinle.wowcheat.Enum.FileType;
 import com.cinle.wowcheat.Enum.RoleEnum;
+import com.cinle.wowcheat.Event.ImagePressEvent;
 import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.CustomerMessage;
 import com.cinle.wowcheat.Model.Friends;
@@ -11,8 +13,11 @@ import com.cinle.wowcheat.Model.UserFileDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Utils.EscapeHtmlUtils;
+import com.cinle.wowcheat.Utils.ImageCompressUtils;
 import com.cinle.wowcheat.Utils.UploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +42,9 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
 
     @Autowired
     UserFileDetailDao fileDetailDao;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
 
     @Override
@@ -117,14 +125,13 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
                 }
 
             } catch (Exception e) {
+                //上传异常
                 socketMessage.error().setErrorMessage(e.getMessage());
                 messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(socketMessage, true));
-                return;
             }
 
         } else {
             messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(socketMessage, true));
-            return;
         }
 
     }
@@ -132,6 +139,10 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
     private CustomerMessage uploadFile(MultipartFile file, CustomerMessage message) throws UploadFileException {
         String name = file.getOriginalFilename();
         String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
+        //如果是图片，则统一改为jpg，后续开启一个线程去压缩已上传的图片
+        if(FileType.image.equals(message.getFileDetail().getFileType())){
+            suffixName = ".jpg";
+        }
         String uuName = UUID.randomUUID().toString();
         //真实保存路径
         String RealName = uuName + suffixName;
@@ -148,6 +159,10 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         userFileDetail.setFileType(message.getFileDetail().getFileType().toString());
         userFileDetail.setUploadTime(new Timestamp(new Date().getTime()));
         fileDetailDao.insertSelective(userFileDetail);
+        //发送图片压缩事件,
+        ApplicationEvent event = new ImagePressEvent(userFileDetail);
+        applicationContext.publishEvent(event);
+
 
         return message;
     }
