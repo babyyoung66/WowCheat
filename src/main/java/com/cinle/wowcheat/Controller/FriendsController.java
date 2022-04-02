@@ -61,8 +61,7 @@ public class FriendsController {
             users.get(i).getConcatInfo().setUnReadTotal(total);
             i++;
         }
-
-        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(users);
+        AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));
         return ajaxResponse;
     }
 
@@ -119,6 +118,7 @@ public class FriendsController {
      */
     @PostMapping("/delete")
     public AjaxResponse deleteFriend(@RequestBody @Valid Friends friends) {
+
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         friendsServices.deleteByUuid(shelf, friends.getfUuid());
@@ -130,37 +130,50 @@ public class FriendsController {
 
     /**
      * 修改好友关系状态
-     *
+     * 更新数据库，同时前端自行修改状态
      * @param friends
      * @return
      */
     @PostMapping("/changeStatus")
     public AjaxResponse changeStatus(@RequestBody @Valid Friends friends) {
+        System.out.println("friends = " + friends);
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
+        String res = "";
+        //检查是否满足可更改的状态
+        switch (friends.getStatus()){
+            case 1:
+                res = "好友状态已恢复正常！";
+                break;
+            case 2:
+                res = "已将好友屏蔽，将不会接收好友信息！";
+                break;
+            case 3:
+                res = "已将好友拉黑！";
+                break;
+            default:
+                return ajaxResponse.error().setMessage("服务器拒绝了您的请求！");
+        }
         int rs = friendsServices.updateStatusByUuid(shelf, friends.getfUuid(), friends.getStatus());
         if (rs < 0) {
             return ajaxResponse.error().setMessage("修改失败，请重新尝试！");
         }
-        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
-        List users = userServices.selectByFriendsUuidList(uuids, shelf);
-        return ajaxResponse.success().setMessage("更改成功！").setData(JSON.toJSON(users));
+        return ajaxResponse.success().setMessage(res);
     }
 
     /**
      * 修改好友备注
-     *
-     * @param friends 返回新列表
-     * @return
+     * @param friends
+     * @return 返回成功状态，前端直接修改本地记录
      */
     @PostMapping("/editRemarks")
     public AjaxResponse editRemarks(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         friends.setsUuid(shelf);
-        if (!StringUtils.hasText(friends.getRemarks())) {
-            return ajaxResponse.error().setMessage("请输入备注！");
-        }
+//        if (!StringUtils.hasText(friends.getRemarks())) {
+//            return ajaxResponse.error().setMessage("请输入备注！");
+//        }
         Friends fri = friendsServices.findFriend(shelf, friends.getfUuid());
         if (fri == null) {
             return ajaxResponse.error().setMessage("对方不是您的好友！");
@@ -169,9 +182,7 @@ public class FriendsController {
         if (rs < 0) {
             return ajaxResponse.error().setMessage("修改失败，请重新尝试！");
         }
-        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
-        List users = userServices.selectByFriendsUuidList(uuids, shelf);
-        return ajaxResponse.success().setMessage("更改成功！").setData(JSON.toJSON(users));
+        return ajaxResponse.success().setMessage("更改成功！");
     }
 
     /**
