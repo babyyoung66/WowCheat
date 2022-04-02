@@ -22,13 +22,20 @@ public class WebSocketController {
     SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/sendMessage")
-    public void sendMessage(SocketUserPrincipal principal , CustomerMessage message){
-        message.setContentType("text");
-        if ("personal".equals(message.getMsgType())){
-            socketMessageServices.sendToUser(principal,message);
+    public void sendMessage(SocketUserPrincipal principal, CustomerMessage message) {
+        if (principal.getLimitTotal() > SocketConstants.LIMIT_TOTAL) {
+            SocketMessage socketMessage = new SocketMessage();
+            String res = String.format("操作过于频繁，请%d秒后再尝试！", SocketConstants.LIMIT_SECOND % 1000);
+            socketMessage.error().setErrorMessage(res);
+            messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(socketMessage, true));
+            return;
         }
-        if ("group".equals(message.getMsgType())){
-            socketMessageServices.sendToGroup(principal,message);
+        message.setContentType("text");
+        if ("personal".equals(message.getMsgType())) {
+            socketMessageServices.sendToUser(principal, message);
+        }
+        if ("group".equals(message.getMsgType())) {
+            socketMessageServices.sendToGroup(principal, message);
         }
 
     }
