@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Event;
 
 import com.cinle.wowcheat.Enum.MailTypeEnum;
-import com.cinle.wowcheat.Utils.SendMailUtils;
+import com.cinle.wowcheat.Service.SendMailServices;
 import com.cinle.wowcheat.Vo.MailMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -17,15 +17,15 @@ import org.springframework.stereotype.Component;
 public class SendMailEventListener {
 
     @Autowired
-    SendMailUtils mailComponent;
+    SendMailServices mailServices;
 
     @Async("AsyncExecutor")//异步处理
     @EventListener(SendMailEvent.class)
     public void sendMail(SendMailEvent event){
         MailMessage mailMessage = (MailMessage) event.getSource();
         if (mailMessage.getType() == MailTypeEnum.HTML){
-            mailComponent.sendHtmlMail(mailMessage);
+            mailServices.sendHtmlMail(mailMessage);
         }
-        mailComponent.sendSimpleMail(mailMessage);
+        mailServices.sendSimpleMail(mailMessage);
     }
 }
