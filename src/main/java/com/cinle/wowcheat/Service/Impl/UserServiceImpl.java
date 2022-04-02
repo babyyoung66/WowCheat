@@ -85,6 +85,11 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
+    public MyUserDetail selectByFriendUuid(String sUuid, String fUuid) {
+        return userdetailDao.selectByFriendUuid(sUuid,fUuid);
+    }
+
+    @Override
     public MyUserDetail selectByUUID(String uuid) {
         MyUserDetail usr = userdetailDao.selectByUUID(uuid);
         if (usr != null) {
