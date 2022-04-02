@@ -7,8 +7,8 @@
         <id column="auto_id" jdbcType="INTEGER" property="autoId"/>
         <result column="s_uuid" jdbcType="VARCHAR" property="sUuid"/>
         <result column="f_uuid" jdbcType="VARCHAR" property="fUuid"/>
-        <result column="f_remarks" jdbcType="VARCHAR" property="fRemarks"/>
-        <result column="f_status" jdbcType="INTEGER" property="fStatus"/>
+        <result column="f_remarks" property="fremarks"/>
+        <result column="f_status"  property="fstatus"/>
         <result column="lastCheatTime" property="lastCheatTime"/>
     </resultMap>
     <sql id="Base_Column_List">
@@ -22,7 +22,7 @@
     </select>
     <delete id="deleteByUuid">
     delete from wow_friends
-    where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+    where s_uuid = #{sUuid} and f_uuid = #{fUuid}
   </delete>
     <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId"
             parameterType="com.cinle.wowcheat.Model.Friends" useGeneratedKeys="true">
@@ -34,10 +34,10 @@
             <if test="fUuid != null">
                 f_uuid,
             </if>
-            <if test="fRemarks != null">
+            <if test="fremarks != null">
                 f_remarks,
             </if>
-            <if test="fStatus != null">
+            <if test="fstatus != null">
                 `f_status`,
             </if>
 
@@ -52,25 +52,25 @@
             <if test="fUuid != null">
                 #{fUuid,jdbcType=VARCHAR},
             </if>
-            <if test="fRemarks != null">
-                #{fRemarks},
+            <if test="fremarks != null">
+                #{remarks},
             </if>
-            <if test="fStatus != null">
-                #{fStatus,jdbcType=INTEGER},
+            <if test="fstatus != null">
+                #{status,jdbcType=INTEGER},
             </if>
             <if test="lastCheatTime != null">
-                #{lastCheatTime,jdbcType=INTEGER},
+                #{lastCheatTime},
             </if>
         </trim>
     </insert>
     <update flushCache="true" id="updateStatusByUuid"  parameterType="com.cinle.wowcheat.Model.Friends" >
         update wow_friends
         <set>
-            <if test="fStatus != null">
-                `f_status` = #{fStatus},
+            <if test="fstatus != null">
+                `f_status` = #{fstatus},
             </if>
         </set>
-        where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
     </update>
     <insert id="insertByUuid">
         insert into wow_friends
@@ -87,17 +87,17 @@
         select
         <include refid="Base_Column_List"></include>
         from wow_friends
-        where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
     </select>
 
     <update id="updateRemarksByUuid">
         update wow_friends
         <set>
-            <if test="fRemarks != null">
-                f_remarks = #{fRemarks},
+            <if test="fremarks != null">
+                f_remarks = #{fremarks},
             </if>
         </set>
-        where s_uuid = #{s_uuid} and f_uuid = #{f_uuid}
+        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
     </update>
     <update flushCache="false" id="updateLastCheatTime" >
         update wow_friends
