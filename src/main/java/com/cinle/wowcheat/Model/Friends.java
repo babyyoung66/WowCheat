@@ -33,12 +33,12 @@ public class Friends implements Serializable {
     @Length(max = 12,message = "备注长度0-12位!")
     @Pattern(regexp = "[^<>#^\\r\\t\\n*&\\\\/$]*?",
             message = "备注不能包含特殊符号!")
-    private String fRemarks;
+    private String fremarks;
 
     /**
      * 好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1
      */
-    private Integer fStatus;
+    private Integer fstatus;
 
     /**
      * 上次联系时间
@@ -80,11 +80,11 @@ public class Friends implements Serializable {
     }
 
     public String getRemarks() {
-        return fRemarks;
+        return fremarks;
     }
 
     public void setRemarks(String remarks) {
-        this.fRemarks = remarks;
+        this.fremarks = remarks;
     }
 
     public static long getSerialVersionUID() {
@@ -92,11 +92,11 @@ public class Friends implements Serializable {
     }
 
     public Integer getStatus() {
-        return fStatus;
+        return fstatus;
     }
 
     public void setStatus(Integer status) {
-        this.fStatus = status;
+        this.fstatus = status;
     }
 
 
@@ -122,8 +122,8 @@ public class Friends implements Serializable {
                 "autoId=" + autoId +
                 ", sUuid='" + sUuid + '\'' +
                 ", fUuid='" + fUuid + '\'' +
-                ", fRemarks='" + fRemarks + '\'' +
-                ", fStatus=" + fStatus +
+                ", fremarks='" + fremarks + '\'' +
+                ", fstatus=" + fstatus +
                 ", lastCheatTime=" + lastCheatTime +
                 ", unReadTotal=" + unReadTotal +
                 '}';
