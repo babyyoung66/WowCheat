@@ -28,6 +28,8 @@ public interface UserServices {
 
     List<MyUserDetail> selectByFriendsUuidList(List<String> uuidList , String sUuid);
 
+    MyUserDetail selectByFriendUuid(String sUuid, String fUuid);
+
     MyUserDetail selectByUUID(String uuid);
 
     MyUserDetail selectByWowId( String wowId);
