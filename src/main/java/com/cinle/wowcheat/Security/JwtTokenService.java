@@ -68,7 +68,7 @@ public class JwtTokenService {
         try {
             redisTemplate.opsForValue().set(key, token, MyConst.TOKEN_Expiration, TimeUnit.SECONDS);
         }catch (Exception e){
-            log.info("Redis操作异常！" + e.getMessage());
+            log.error("Redis操作异常！" + e.getMessage());
             throw new RedisOptionsException("Redis操作异常！" + e.getMessage());
         }
 
@@ -87,7 +87,7 @@ public class JwtTokenService {
             map.put("uuid", uuid);
             map.put("role", roles);
         } catch (Exception e) {
-            log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
+            log.error("Token:{} 解析失败! 原因: {}", token, e.getMessage());
             throw new TokenException("token解析失败，请尝试重新登录！");
         }
         return map;
@@ -110,7 +110,7 @@ public class JwtTokenService {
         try {
             redisTemplate.opsForValue().getOperations().delete(key);
         }catch (Exception e){
-            log.info("Redis操作异常！" + e.getMessage());
+            log.error("Redis操作异常！" + e.getMessage());
             throw new RedisOptionsException("Redis操作异常！" + e.getMessage());
         }
 
@@ -127,7 +127,7 @@ public class JwtTokenService {
             CheckTokenByRedis(token);
             isTokenExpires(token);
         } catch (Exception e) {
-            log.info("Token验证失败! 原因: {}", e.getMessage());
+            log.error("Token验证失败! 原因: {}", e.getMessage());
             throw new TokenException(e.getMessage());
         }
     }
@@ -149,7 +149,7 @@ public class JwtTokenService {
                 throw new TokenException("Token已过期，请尝试重新登录！");
             }
         } catch (JWTVerificationException e) {
-            log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
+            log.error("Token:{} 解析失败! 原因: {}", token, e.getMessage());
             throw new TokenException("Token解析失败，请尝试重新登录！");
         }
     }
@@ -198,7 +198,7 @@ public class JwtTokenService {
                 log.info("用户: {} 返回新token......", uuid);
             }
         } catch (Exception e) {
-            log.info("Token:{} 解析失败! 原因: {}", token, e.getMessage());
+            log.error("Token:{} 解析失败! 原因: {}", token, e.getMessage());
             throw new JWTVerificationException("token解析失败，请尝试重新登录！");
         }
         return newToken;
