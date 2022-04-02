@@ -19,22 +19,14 @@ public class FileConst {
 
 
     /**
-     * 注册时默认头像路径
-     */
-    public static final String DEFAULT_PHOTO_URL = "../static/cheat.png";
-
-    /**
      * 文件上传对应的本地路径
      */
     public static final String LOCAL_PATH = System.getProperty("user.home") + "/WowCheat" + ACCESS_PATH;
 
-    public static final String SIZE_IMAGE = "10M";
-
-    public static final String SIZE_FILE = "50M";
-
-    public static final String SIZE_VIDEO = "200M";
-
-    public static final String SIZE_SOUND = "30M";
+    /**
+     * 注册时默认头像路径
+     */
+    public static final String DEFAULT_PHOTO_URL = "../static/cheat.png";
 
     public static final String IMAGE_PATH = "image/";
 
@@ -42,4 +34,19 @@ public class FileConst {
      * 聊天文件存放根路径
      */
     public static final String CHEAT_FILES_PATH = "cheatFiles/";
+
+    public static final String SIZE_IMAGE = "5M";
+
+    public static final String SIZE_FILE = "200M";
+
+    public static final String SIZE_VIDEO = "200M";
+
+    public static final String SIZE_SOUND = "15M";
+
+    /**
+     * 文件名限制长度
+     */
+    public static final int NAME_LIMIT = 150;
+
+
 }
