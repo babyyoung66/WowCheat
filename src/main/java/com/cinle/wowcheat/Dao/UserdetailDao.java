@@ -25,7 +25,10 @@ public interface UserdetailDao {
 
     List<MyUserDetail> selectByFriendsUuidList(@Param("uuidList") List<String> uuidList ,@Param("sUuid") String sUuid );
 
+    MyUserDetail selectByFriendUuid(@Param("sUuid") String sUuid,@Param("fUuid") String fUuid);
+
     MyUserDetail selectByUUID(@Param("uuid")String uuid);
 
     MyUserDetail selectByWowId(@Param("wowId") String wowId);
+
 }
