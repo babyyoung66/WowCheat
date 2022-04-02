@@ -1,7 +1,6 @@
 package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
-import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * @Author JunLe
@@ -34,7 +31,7 @@ public class CustomerAuthenticationEntryPoint implements AuthenticationEntryPoin
         out.write(JSON.toJSONString(ajaxResponse));
         out.flush();
         out.close();
-        log.info("来自主机: {}:{} 的匿名访问，访问路径为: {}", request.getRemoteHost(), request.getRemotePort(),request.getRequestURI());
-
+        //log.info("来自主机: {}:{} 的匿名访问，访问路径为: {}", request.getRemoteHost(), request.getRemotePort(),request.getRequestURI());
+        return;
     }
 }
