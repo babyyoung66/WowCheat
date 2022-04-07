@@ -11,8 +11,11 @@ import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Utils.UploadUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import com.cinle.wowcheat.Vo.UserEditVo;
+import io.swagger.annotations.Api;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -22,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.UUID;
@@ -30,8 +34,7 @@ import java.util.UUID;
  * @Author JunLe
  * @Time 2022/2/20 21:33
  */
-
-//开启校验功能
+@Api
 @Validated
 @RestController
 @RequestMapping("/user")
@@ -49,21 +52,22 @@ public class UserController {
     /**
      * 根据wowId查找用户
      *
-     * @param wowId
-     * @return
+     * @param wowId x-www-form形式请求
+     * @return 返回用户信息，前端自行判断非空
      */
 
     @PostMapping("/queryUser")
-    public AjaxResponse queryUserByWowId(String wowId) {
+    public AjaxResponse queryUserByWowId(
+                                         @NotBlank(message = "Wow号不能为空!")
+                                         @Pattern(regexp = "[a-zA-Z0-9]*", message = "Wow号不能包含中文字符及特殊符号!")
+                                         @Length(min = 5, max = 18, message = "Wow号长度5-18位!")
+                                                 String wowId) {
         AjaxResponse ajaxResponse = new AjaxResponse();
-        String wow = wowId;
-        if (StringUtils.hasText(wow)) {
-            MyUserDetail usr = userServices.selectByWowId(wow);
-            if (usr != null) {
-                return ajaxResponse.success().setData(JSON.toJSON(usr));
-            }
+        MyUserDetail usr = userServices.selectByWowId(wowId);
+        if (usr != null) {
+            ajaxResponse.setData(JSON.toJSON(usr));
         }
-        return ajaxResponse.error().error().setMessage("该用户不存在！");
+        return ajaxResponse.success();
     }
 
     /**
@@ -146,8 +150,8 @@ public class UserController {
     public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException, FileUploadException {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
-        boolean checkType = UploadUtils.checkFileType(file,FileType.image);
-        if (!checkType){
+        boolean checkType = UploadUtils.checkFileType(file, FileType.image);
+        if (!checkType) {
             return response.error().setCode(501).setMessage("不允许上传该类型文件!");
         }
         MyUserDetail usr = userServices.selectByUUID(uuid);
@@ -157,18 +161,58 @@ public class UserController {
         String name = file.getOriginalFilename();
         String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
         String uuName = UUID.randomUUID().toString();
-        String filePath = FileConst.IMAGE_PATH + uuName + suffixName;
-        UploadUtils.uploadFile(file, filePath, FileType.image);
+        String uploadPath = FileConst.IMAGE_PATH + uuName + suffixName;
+        String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
+        UploadUtils.uploadFile(file, uploadPath, FileType.image);
         //存入数据库
         MyUserDetail newInfo = new MyUserDetail();
-        newInfo.setPhotourl(FileConst.UPLOAD_BASE_PATH + filePath);
+        newInfo.setPhotourl(fileUrl);
         newInfo.setUuid(uuid);
         userServices.updateByUUIDSelective(newInfo);
 
-        usr.setPhotourl(FileConst.UPLOAD_BASE_PATH + filePath);
+        usr.setPhotourl(fileUrl);
         response.success().setMessage("修改成功！").setData(JSON.toJSON(usr));//返回更新后的数据
         return response;
     }
 
+
+    /**
+     * 按需更改基本信息
+     * 传入参数不为空则修改
+     *
+     * @param file 用户头像
+     * @param user
+     * @return 返回本人新资料
+     */
+    @PostMapping("/edit")
+    public AjaxResponse editUserInfo(@Valid UserEditVo user, MultipartFile file) throws UploadFileException {
+        AjaxResponse response = new AjaxResponse();
+        String uuid = SecurityContextUtils.getCurrentUserUUID();
+        user.setUuid(uuid);
+        if (file != null && file.getSize() > 0) {
+            boolean checkType = UploadUtils.checkFileType(file, FileType.image);
+            if (!checkType) {
+                return response.error().setCode(501).setMessage("不允许上传该类型文件!");
+            }
+            String FileName = file.getOriginalFilename();
+            String suffixName = FileName.substring(FileName.lastIndexOf("."));       //获取文件后缀
+            String uuName = UUID.randomUUID().toString();
+            String uploadPath = FileConst.IMAGE_PATH + uuName + suffixName;
+            String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
+            UploadUtils.uploadFile(file, uploadPath, FileType.image);
+
+            user.setPhotourl(fileUrl);
+
+        }
+
+        MyUserDetail userDetail = new MyUserDetail();
+        BeanUtils.copyProperties(user, userDetail);
+        int res = userServices.updateByUUIDSelective(userDetail);
+        if (res > 0) {
+            MyUserDetail NewUsr = userServices.selectByUUID(uuid);
+            return response.success().setData(JSON.toJSON(NewUsr));
+        }
+        return response.error().setCode(501).setMessage("资料更新失败！");
+    }
 
 }
