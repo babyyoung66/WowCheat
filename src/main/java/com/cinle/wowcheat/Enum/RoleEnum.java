@@ -9,43 +9,18 @@ public enum RoleEnum {
     /**
      * 管理员，对应数据库0
      * */
-    ADMIN("admin",0),
+    ADMIN,
 
     /**
      * 普通用户，对应数据库1
      * */
-    NORMAL("normal",1),
+    NORMAL,
 
     /**
      * VIP，对应数据库2
      * */
-    VIP("vip",2),
+    VIP,
 
-    TEST("test",3);
-    private  String name;
-    private  int index;
-
-
-    RoleEnum(String name, int index) {
-        this.name = name;
-        this.index = index;
-    }
-
-    public int getIndex() {
-        return this.index;
-      }
-    public String getName(){
-        return this.name;
-    }
-
-    public static String getNameByIndex(int index){
-        String name = null;
-            for (RoleEnum r : RoleEnum.values()){
-                if (r.getIndex() == index)
-                    name = r.getName();
-            }
-
-            return name;
-    }
+    TEST;
 
 }
