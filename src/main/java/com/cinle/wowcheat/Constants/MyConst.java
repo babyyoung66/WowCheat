@@ -38,6 +38,4 @@ public class MyConst{
     public static final String TOKEN_ISSUER = "WOW_CHEAT";
 
 
-
-
 }
