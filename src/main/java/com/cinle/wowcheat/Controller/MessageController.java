@@ -7,6 +7,8 @@ import com.cinle.wowcheat.Enum.FileType;
 import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.CustomerMessage;
 import com.cinle.wowcheat.Model.FileDetail;
+import com.cinle.wowcheat.Model.Friends;
+import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Utils.UploadUtils;
@@ -15,6 +17,8 @@ import com.cinle.wowcheat.WebSocket.SendSocketMessageServices;
 import com.cinle.wowcheat.WebSocket.SocketUserPrincipal;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +42,9 @@ public class MessageController {
 
     @Autowired
     SendSocketMessageServices socketMessageServices;
+
+    @Autowired
+    FriendsServices friendsServices;
 
     @PostMapping("/getAll")
     public AjaxResponse getMessageByUUID(@RequestBody CustomerMessage customerMessage) {
@@ -78,7 +85,8 @@ public class MessageController {
 
     /**
      * 分页获取消息记录
-     *
+     *  传入的to为对方uuid
+     *  group消息的to永远是群组uuid
      * @param customerMessage
      * @return
      * @see MessageConst
@@ -88,14 +96,21 @@ public class MessageController {
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         customerMessage.setFrom(uuid);
         AjaxResponse response = new AjaxResponse();
-        List personalMess = messageServices.findMessageByPages(customerMessage, "personal");
-        //有可能是群聊
-        List GroupMess = messageServices.findMessageByPages(customerMessage, "group");
-        if (!personalMess.isEmpty()) {
-            response.setData(JSON.toJSON(personalMess));
+        //验证身份
+        if ("personal".equals(customerMessage.getMsgType())){
+            //个人
+            Friends friends = friendsServices.findFriend(uuid,customerMessage.getTo());
+            if (friends == null){
+                return response.error().setMessage("您未添加该用户！");
+            }
         }
-        if (!GroupMess.isEmpty()) {
-            response.setData(JSON.toJSON(GroupMess));
+        if ("group".equals(customerMessage.getMsgType())) {
+            /**待办！！！*/
+            return response.error().setMessage("您未添加该群聊！");
+        }
+        List mess = messageServices.findMessageByPages(customerMessage, customerMessage.getMsgType());
+        if (mess != null) {
+            response.setData(JSON.toJSON(mess));
         }
         response.success();
         return response;
