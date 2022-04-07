@@ -95,7 +95,6 @@ public class UploadUtils {
         if (file == null){
             throw new UploadFileException("请选择文件！");
         }
-        String suffixName = filePath.substring(filePath.lastIndexOf("."));
 
         Path path = Paths.get(FileConst.LOCAL_PATH + filePath);
         boolean checkSize = cheekSize(file.getSize(), type);
@@ -131,7 +130,7 @@ public class UploadUtils {
             try {
                 Files.delete(path);
             } catch (IOException e) {
-                log.info("删除文件失败,文件路径为: {},原因: {}", realPath, e.getMessage());
+                log.error("删除文件失败,文件路径为: {},原因: {}", realPath, e.getMessage());
                 throw new FileUploadException("文件删除失败！\n" + e.getMessage());
             }
 
