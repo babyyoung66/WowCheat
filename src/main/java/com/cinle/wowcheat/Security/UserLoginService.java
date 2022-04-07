@@ -37,13 +37,13 @@ public class UserLoginService implements UserDetailsService {
         List<String> roles=new ArrayList<>();
         List<Role> r = roleServices.selectByUseruid(customerUserDetails.getUuid());
         if (r == null|| r.isEmpty()){
-            roles.add(RoleEnum.NORMAL.getName());
+            roles.add(RoleEnum.NORMAL.toString());
         }else {
             for(Role rs : r){
                 if(rs.getRole() == null || rs.getRole().equals("")){
-                    roles.add(RoleEnum.NORMAL.getName());
+                    roles.add(RoleEnum.NORMAL.toString());
                 }else {
-                    roles.add(rs.getRole().getName());
+                    roles.add(rs.getRole().toString());
                 }
             }
         }
