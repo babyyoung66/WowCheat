@@ -105,10 +105,9 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
             String uuid = (String) info.get("uuid");
             List<String> roles = (List) info.get("role");
             if (StringUtils.hasText(uuid)) {
-                //List<Role> r = roleServices.selectByUseruid(uuid); //关闭session后每次都会查询MySQL，已弃用
                 Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 if (roles == null || roles.isEmpty()) {
-                    authorities.add(new SimpleGrantedAuthority(RoleEnum.NORMAL.getName()));
+                    authorities.add(new SimpleGrantedAuthority(RoleEnum.NORMAL.toString()));
                 } else {
                     for (String rs : roles) {
                         authorities.add(new SimpleGrantedAuthority(rs));
