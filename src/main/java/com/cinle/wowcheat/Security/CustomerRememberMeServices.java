@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServletRequest;
  * @Author JunLe
  * @Time 2022/2/23 9:59
  * 从JSON中获取rememberme
+ *
  */
+@Deprecated
 public class CustomerRememberMeServices extends PersistentTokenBasedRememberMeServices {
 
 
