@@ -4,13 +4,14 @@ import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -50,7 +51,8 @@ public class MyUserDetail implements Serializable {
     @Length(min = 6,max = 18,message = "密码长度6-18位!")
     private String password;
 
-    @ApiModelProperty(value = "性别，0代表女，1代表男，3代表隐藏，默认3")
+    @ApiModelProperty(value = "性别，0代表女，1代表男，2代表隐藏，默认2",example = "1")
+    @Range(min = 0,max = 2,message = "性别格式错误！")
     private Integer sex;
 
     @ApiModelProperty(value = "用户头像链接")
@@ -67,13 +69,14 @@ public class MyUserDetail implements Serializable {
     private String email;
 
     @ApiModelProperty(value = "用户生日")
-    private String birthday;
+    @JSONField(format="yyyy-MM-dd")
+    private Date birthday;
 
     @ApiModelProperty(value = "用户地址")
     private String address;
 
     @ApiModelProperty(value = "用户注册时间",readOnly = true)
-    private LocalDateTime creattime;
+    private Date creattime;
 
     @ApiModelProperty(value = "账号状态，1正常，2限制登录")
     private Integer status;
@@ -157,11 +160,11 @@ public class MyUserDetail implements Serializable {
         this.email = email;
     }
 
-    public String getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(String birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 
@@ -173,11 +176,11 @@ public class MyUserDetail implements Serializable {
         this.address = address;
     }
 
-    public LocalDateTime getCreattime() {
+    public Date getCreattime() {
         return creattime;
     }
 
-    public void setCreattime(LocalDateTime creattime) {
+    public void setCreattime(Date creattime) {
         this.creattime = creattime;
     }
 
