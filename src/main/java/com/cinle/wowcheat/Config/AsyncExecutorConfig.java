@@ -23,9 +23,9 @@ public class AsyncExecutorConfig {
         taskExecutor.setMaxPoolSize(12);
         taskExecutor.setKeepAliveSeconds(60);
         taskExecutor.setThreadNamePrefix("AsyncExecutor--");
-        taskExecutor.setQueueCapacity(300);
+        taskExecutor.setQueueCapacity(500);
         //拒绝策略
-        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         taskExecutor.initialize();
         return taskExecutor;
     }
