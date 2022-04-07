@@ -2,12 +2,12 @@ package com.cinle.wowcheat.Model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * wow_friends
@@ -36,15 +36,16 @@ public class Friends implements Serializable {
     private String fremarks;
 
     /**
-     * 好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1
+     * 好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1,4只能删除时由系统设置
      */
+    @Range(min = 0,max = 3,message = "好友状态格式错误！！")
     private Integer fstatus;
 
     /**
      * 上次联系时间
      * */
     @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
-    private Timestamp lastCheatTime;
+    private Date lastCheatTime;
 
     /**
      * 未读记录数
@@ -100,11 +101,11 @@ public class Friends implements Serializable {
     }
 
 
-    public Timestamp getLastCheatTime() {
+    public Date getLastCheatTime() {
         return lastCheatTime;
     }
 
-    public void setLastCheatTime(Timestamp lastCheatTime) {
+    public void setLastCheatTime(Date lastCheatTime) {
         this.lastCheatTime = lastCheatTime;
     }
 
