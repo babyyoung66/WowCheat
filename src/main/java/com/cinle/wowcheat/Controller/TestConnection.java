@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Controller;
 
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestConnection {
     private AjaxResponse response = new AjaxResponse().success().setMessage("服务连接正常！");
 
-    @RequestMapping("/ping")
+    @PostMapping("/ping")
     public AjaxResponse ping(){
         return response;
     }
