@@ -22,8 +22,8 @@ public class WebSocketTaskExecutor {
         executor.setCorePoolSize(6);
         executor.setMaxPoolSize(16);
         executor.setKeepAliveSeconds(60);
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setQueueCapacity(300);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("WebSocketExecutor");
         executor.initialize();
         return executor;
