@@ -65,8 +65,7 @@ public class FriendsServicesImpl implements FriendsServices {
 
     @Override
     public int updateLastCheatTime(Friends record) {
-        Timestamp timestamp = new Timestamp(new Date().getTime());
-        record.setLastCheatTime(timestamp);
+        record.setLastCheatTime(new Date());
         return friendsDao.updateLastCheatTime(record);
     }
 }
