@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 
@@ -121,7 +122,7 @@ public class RegisterController {
 
     @ApiOperation(value = "检查Id是否可用",notes = "")
     @PostMapping("/isIdHasRegister")
-    public AjaxResponse isIdHasRegister(@org.jetbrains.annotations.NotNull @RequestBody @Valid RegisterVo user){
+    public AjaxResponse isIdHasRegister(@NotNull @RequestBody @Valid RegisterVo user){
         AjaxResponse ajaxResponse = new AjaxResponse();
         if (user.getWowId() == null || "".equals(user.getWowId())){
             return ajaxResponse.error().setMessage("请输入Id!");
