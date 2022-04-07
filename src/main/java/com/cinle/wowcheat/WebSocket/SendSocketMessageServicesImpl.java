@@ -52,6 +52,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         customerMessage.setMsgType("personal");
         customerMessage.setTime(new Date());
         coverMessage coverMessage = checkFriend(principal.getName(), customerMessage);
+        coverMessage.getMessage().setType(SocketMessageType.cheat);
         if (coverMessage.isSuccess()) {
             sendTextMessage(principal, coverMessage.getMessage());
         }
@@ -66,6 +67,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         customerMessage.setMsgType("group");
         customerMessage.setTime(new Date());
         coverMessage coverMessage = checkGroup(principal.getName(), customerMessage);
+        coverMessage.getMessage().setType(SocketMessageType.cheat);
         if (coverMessage.isSuccess()) {
             //获取数据库群组成员列表，遍历发送
             for (int i = 0; i < 999; i++) {
@@ -80,9 +82,10 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
     @Override
     public void sendTopic(SocketUserPrincipal principal, CustomerMessage customerMessage) {
         SocketMessage message = new SocketMessage();
+        message.setType(SocketMessageType.notice);
         List<String> roles = principal.getRoles();
         //非管理员不允许发送topic消息
-        if (!roles.contains(RoleEnum.ADMIN.getName())) {
+        if (!roles.contains(RoleEnum.ADMIN.toString())) {
             message.error().setErrorMessage("您无权限操作！");
             messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
             return;
@@ -238,6 +241,12 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
             return coverMessage;
         }
         Friends friendsInfo = friendsServices.findFriend(customerMessage.getTo(), shelfUuid);
+        if (friendsInfo == null){
+            socketMessage.error().setCode(404).setErrorMessage("对方不是您的好友！");
+            coverMessage.setMessage(socketMessage);
+            coverMessage.setSuccess(false);
+            return coverMessage;
+        }
         switch (shelfInfo.getStatus()) {
             //好友状态（1正常，2屏蔽，3拉黑，4被对方删除）默认1
             case 1:

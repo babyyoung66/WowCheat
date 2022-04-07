@@ -13,6 +13,8 @@ public class SocketMessage {
 
     private Object message;
 
+    private SocketMessageType type;
+
     public SocketMessage success(){
         this.code = 200;
         this.success = true;
@@ -61,6 +63,14 @@ public class SocketMessage {
         return this;
     }
 
+    public SocketMessageType getType() {
+        return type;
+    }
+
+    public void setType(SocketMessageType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "SocketMessage{" +
@@ -68,6 +78,7 @@ public class SocketMessage {
                 ", success=" + success +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", message=" + message +
+                ", type=" + type +
                 '}';
     }
 }
