@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserServices {
         /*使用hutool工具生成uuid*/
         String uuid = IdUtil.objectId();
         //记录插入时间
-        LocalDateTime dateTime = LocalDateTime.now();
+        Date dateTime = new Date();
         record.setCreattime(dateTime);
         record.setUuid(uuid);
         return userdetailDao.insertSelective(record);
