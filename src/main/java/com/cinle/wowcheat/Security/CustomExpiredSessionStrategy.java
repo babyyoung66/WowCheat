@@ -12,7 +12,9 @@ import java.io.IOException;
  * @Author JunLe
  * @Time 2022/2/23 10:22
  * session出现异常处理
+ * 弃用
  */
+@Deprecated
 public class CustomExpiredSessionStrategy implements SessionInformationExpiredStrategy {
     @Override
     public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException, ServletException {
