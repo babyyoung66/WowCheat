@@ -2,15 +2,20 @@ package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Enum.CheatStatus;
+import com.cinle.wowcheat.Event.SendSocketMessageEvent;
 import com.cinle.wowcheat.Model.Friends;
+import com.cinle.wowcheat.Model.FriendsRequest;
 import com.cinle.wowcheat.Model.MyUserDetail;
+import com.cinle.wowcheat.Service.FriendRequestServices;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
+import com.cinle.wowcheat.WebSocket.SocketMessage;
+import com.cinle.wowcheat.WebSocket.SocketMessageType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author JunLe
@@ -38,6 +43,10 @@ public class FriendsController {
     UserServices userServices;
     @Autowired
     MessageServices messageServices;
+    @Autowired
+    FriendRequestServices friendRequestServices;
+    @Autowired
+    ApplicationContext applicationContext;
 
     /**
      * 根据当前请求用户获取
@@ -53,11 +62,11 @@ public class FriendsController {
         List<MyUserDetail> users = userServices.selectByFriendsUuidList(uuids, selfUuid);
         Iterator<MyUserDetail> it = users.iterator();
         int i = 0;
-        while (it.hasNext()){
+        while (it.hasNext()) {
             MyUserDetail friend = it.next();
             //localDateTime转date
-            Timestamp time = friend.getConcatInfo().getLastCheatTime();
-            long total = messageServices.getPersonalUnReadTotal(friend.getUuid(),selfUuid,time,"personal");
+            Timestamp time = new Timestamp(friend.getConcatInfo().getLastCheatTime().getTime());
+            long total = messageServices.getPersonalUnReadTotal(friend.getUuid(), selfUuid, time, "personal");
             users.get(i).getConcatInfo().setUnReadTotal(total);
             i++;
         }
@@ -66,49 +75,156 @@ public class FriendsController {
     }
 
     /**
-     * @param friends
-     * @return 返回新列表供更新
-     * 添加好友（双向）
-     * 暂未添加请求确认步骤
+     * 发送好友请求
+     *
+     * @param request
+     * @return
      */
-    @PostMapping("/add")
-    public AjaxResponse addFriend(@RequestBody @Valid Friends friends) {
-        AjaxResponse ajaxResponse = new AjaxResponse();
-        String selfUuid = SecurityContextUtils.getCurrentUserUUID();
-        String fUUid = friends.getfUuid();
-        MyUserDetail usr = userServices.selectByUUID(fUUid);
-        Friends isFriend = friendsServices.findFriend(selfUuid, fUUid); //自己
-
+    @PostMapping("/sendRequest")
+    public AjaxResponse SendRequest(@RequestBody @Valid FriendsRequest request) {
+        AjaxResponse response = new AjaxResponse();
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        request.setRequestUuid(shelf);
+        //再次校验数据是否真实
+        MyUserDetail usr = userServices.selectByUUID(request.getReceiverUuid());
         if (usr == null || usr.equals("")) {
-            ajaxResponse.error().setMessage("该用户不存在！");
-            return ajaxResponse;
+            response.error().setMessage("该用户不存在！");
+            return response;
         }
-        if (isFriend != null ) {
-            int status = isFriend.getStatus();
-            if (status == 3) {
-                ajaxResponse.error().setMessage("您已将对方拉黑！");
-            } else {
-                ajaxResponse.error().setMessage("该用户已是您的好友！");
-            }
-            return ajaxResponse;
-        }
-        Friends target = friendsServices.findFriend(fUUid, selfUuid); //对方
-        if (target != null && target.getStatus() == 3) {
-            return ajaxResponse.error().setMessage("您已被对方拉黑！");
-        }
-        friends.setsUuid(selfUuid);
-        //己方添加
-        friendsServices.insertSelective(friends);
-        if (target == null) {
-            //对方已添加，不重复插入,互换uuid位置
-            friends.setsUuid(fUUid);
-            friends.setfUuid(selfUuid);
-            friendsServices.insertSelective(friends);
-        }
-        List<String> uuids = friendsServices.selectFriendUuidList(selfUuid);
-        List users = userServices.selectByFriendsUuidList(uuids, selfUuid);
 
-        return ajaxResponse.success().setMessage("添加成功！").setData(JSON.toJSON(users));
+        //检查是否已存在好友关系
+        Friends friends = friendsServices.findFriend(shelf, request.getReceiverUuid());
+        if (friends != null) {
+            if (1 == friends.getStatus() || 2 == friends.getStatus()) {
+                return response.error().setMessage("对方已是您的好友！");
+            }
+            if (3 == friends.getStatus()) {
+                return response.error().setMessage("对方已被您拉黑！");
+            }
+        }
+        Friends target = friendsServices.findFriend(request.getReceiverUuid(), shelf); //对方
+        if (target != null && target.getStatus() == 3) {
+            return response.error().setMessage("您已被对方拉黑！");
+        }
+        //被自己单方删除过，但是对方未删除，则直接设置通过请求即可,无需入库
+        if (target != null && target.getStatus() == 4) {
+            Friends fu = new Friends();
+            fu.setsUuid(request.getRequestUuid());
+            fu.setfUuid(request.getReceiverUuid());
+            //为自己重新添加
+            friendsServices.insertSelective(fu);
+
+            //设置对方好友为正常状态
+            friendsServices.updateStatusByUuid(request.getReceiverUuid(), shelf, 1);
+
+            request.setRequestStatus(1);
+            //friendRequestServices.insertSelective(request);
+            //发送socket事件更新前端请求列表
+            SocketMessage message = new SocketMessage();
+            message.success();
+            message.setType(SocketMessageType.friendRequest);
+            message.setMessage(request);
+            SendSocketMessageEvent reqEvent = new SendSocketMessageEvent(message);
+            applicationContext.publishEvent(reqEvent);
+            //更新前端好友列表
+            SocketMessage message1 = new SocketMessage();
+            message1.success();
+            message1.setType(SocketMessageType.updateFriend);
+            message1.setMessage(request);
+            SendSocketMessageEvent friendEvent = new SendSocketMessageEvent(message1);
+            applicationContext.publishEvent(friendEvent);
+
+            return response.success();
+        }
+        request.setRequestMessage(request.getRequestMessage().trim());
+        int res = friendRequestServices.insertSelective(request);
+        if (res > 0) {
+            //发送socket事件更新前端请求列表
+            SocketMessage message = new SocketMessage();
+            message.success();
+            message.setType(SocketMessageType.friendRequest);
+            message.setMessage(request);
+            SendSocketMessageEvent event = new SendSocketMessageEvent(message);
+            applicationContext.publishEvent(event);
+            return response.success();
+        }
+        return response.error().setMessage("插入数据失败，请校验数据真实性！");
+    }
+
+    /**
+     * 获取好友请求列表
+     *
+     * @return
+     */
+    @PostMapping("/getRequestList")
+    public AjaxResponse getRequestList() {
+        AjaxResponse response = new AjaxResponse();
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        List<FriendsRequest> list = friendRequestServices.selectListWithUserInfoByShelfUuid(shelf);
+        response.success().setData(JSON.toJSON(list));
+        return response;
+    }
+
+
+    /**
+     * 同意则添加并返回好友信息
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/setRequestStatus")
+    public AjaxResponse setRequestStatus(@RequestBody @Valid FriendsRequest request) {
+        AjaxResponse response = new AjaxResponse();
+        String shelf = SecurityContextUtils.getCurrentUserUUID();
+        //只有接受者才需要更改请求状态
+        request.setReceiverUuid(shelf);
+        int res = friendRequestServices.updateRequestStatusByUuid(request);
+        if (res > 0) {
+            if (request.getRequestStatus() == 1) {
+                boolean success = addFriend(request);
+                if (!success) {
+                    return response.error().setMessage("请尝试重新添加！");
+                }
+                //发送socket事件，更新好友列表(如果在线)
+                SocketMessage socketMessage = new SocketMessage();
+                socketMessage.success();
+                socketMessage.setType(SocketMessageType.updateFriend);
+                socketMessage.setMessage(request);
+                SendSocketMessageEvent event = new SendSocketMessageEvent(socketMessage);
+                applicationContext.publishEvent(event);
+
+            }
+            return response.success();
+        }
+        return response.error().setMessage("更新失败，请校验数据真实性");
+    }
+
+    /**
+     * 接收好友请求时，接受者调用
+     * @param request
+     * @return
+     */
+    private boolean addFriend(FriendsRequest request) {
+        Friends friends = new Friends();
+        friends.setsUuid(request.getReceiverUuid());
+        friends.setfUuid(request.getRequestUuid());
+        //己方添加
+        int shelfRes = friendsServices.insertSelective(friends);
+        if (shelfRes <= 0) {
+            return false;
+        }
+        int friendRes = 0;
+        //查询是否被自己单方删除过
+        Friends oldInfo = friendsServices.findFriend(request.getRequestUuid(), request.getReceiverUuid());
+        if (oldInfo != null) {
+            //重置为正常状态
+            friendRes = friendsServices.updateStatusByUuid(request.getRequestUuid(), request.getReceiverUuid(), 1);
+        } else {
+            friends.setfUuid(request.getReceiverUuid());
+            friends.setsUuid(request.getRequestUuid());
+            friendRes = friendsServices.insertSelective(friends);
+        }
+        return 2 == shelfRes + friendRes;
     }
 
     /**
@@ -118,30 +234,30 @@ public class FriendsController {
      */
     @PostMapping("/delete")
     public AjaxResponse deleteFriend(@RequestBody @Valid Friends friends) {
-
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
-        friendsServices.deleteByUuid(shelf, friends.getfUuid());
-        friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
-        List<String> uuids = friendsServices.selectFriendUuidList(shelf);
-        List users = userServices.selectByFriendsUuidList(uuids, shelf);
-        return ajaxResponse.success().setMessage("删除成功！").setData(JSON.toJSON(users));
+        int rs = friendsServices.deleteByUuid(shelf, friends.getfUuid());
+        if (rs > 0) {
+            friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+            return ajaxResponse.success().setMessage("删除成功！");
+        }
+        return ajaxResponse.error().setCode(501).setMessage("操作失败！");
     }
 
     /**
      * 修改好友关系状态
      * 更新数据库，同时前端自行修改状态
+     *
      * @param friends
      * @return
      */
     @PostMapping("/changeStatus")
     public AjaxResponse changeStatus(@RequestBody @Valid Friends friends) {
-        System.out.println("friends = " + friends);
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         String res = "";
         //检查是否满足可更改的状态
-        switch (friends.getStatus()){
+        switch (friends.getStatus()) {
             case 1:
                 res = "好友状态已恢复正常！";
                 break;
@@ -163,6 +279,7 @@ public class FriendsController {
 
     /**
      * 修改好友备注
+     *
      * @param friends
      * @return 返回成功状态，前端直接修改本地记录
      */
@@ -187,21 +304,22 @@ public class FriendsController {
 
     /**
      * 更新最后联系时间
+     *
      * @param uuid 好友uuid
      * @return
      */
     @PostMapping("/UpdateConcatTime")
-    public AjaxResponse upDateLastCheatTime( String uuid){
+    public AjaxResponse upDateLastCheatTime(String uuid) {
         AjaxResponse response = new AjaxResponse();
         String selfUuid = SecurityContextUtils.getCurrentUserUUID();
         Friends friends = new Friends();
         friends.setsUuid(selfUuid);
         friends.setfUuid(uuid);
         int rst = friendsServices.updateLastCheatTime(friends);
-        if (rst <= 0){
+        if (rst <= 0) {
             return response.error().setMessage("修改好友联系时间失败！");
         }
-        return  response.success().setMessage("更改成功！");
+        return response.success().setMessage("更改成功！");
     }
 
 }
