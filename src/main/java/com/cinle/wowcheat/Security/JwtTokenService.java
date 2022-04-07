@@ -188,10 +188,10 @@ public class JwtTokenService {
                 List<String> roles = new ArrayList<>();
                 List<Role> r = roleServices.selectByUseruid(decodedJWT.getSubject());
                 if (r == null || r.isEmpty()) {
-                    roles.add(RoleEnum.NORMAL.getName());
+                    roles.add(RoleEnum.NORMAL.toString());
                 } else {
                     for (Role rs : r) {
-                        roles.add(rs.getRole().getName());
+                        roles.add(rs.getRole().toString());
                     }
                 }
                 newToken = createToken(uuid, roles);
