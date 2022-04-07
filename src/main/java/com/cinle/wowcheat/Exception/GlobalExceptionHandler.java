@@ -5,6 +5,8 @@ import com.cinle.wowcheat.Vo.AjaxResponse;
 import com.mongodb.MongoSocketReadTimeoutException;
 import io.lettuce.core.RedisCommandTimeoutException;
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -35,7 +37,7 @@ import java.util.Set;
 @RestControllerAdvice(annotations = {RestController.class, Controller.class})
 public class GlobalExceptionHandler {
 
-
+    private Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     /**
      * validate 数据校验异常统一返回
      *
@@ -86,6 +88,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class})
     public AjaxResponse keysNotNull(Exception ex) {
         ex.printStackTrace();
+        log.error(ex.getMessage());
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！" + ex.getMessage());
     }
@@ -97,6 +100,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({SQLException.class})
     public AjaxResponse SQLException(Exception e) {
         e.printStackTrace();
+        log.error(e.getMessage());
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage("SQL执行错误，请联系管理员！");
     }
@@ -152,6 +156,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({UploadFileException.class})
     public AjaxResponse UploadFileException(Exception e) {
 //        e.printStackTrace();
+        log.error(e.getMessage());
         AjaxResponse ajaxResponse = new AjaxResponse();
         return ajaxResponse.error().setMessage(e.getMessage());
     }
@@ -159,6 +164,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MultipartException.class})
     public AjaxResponse MultipartException(Exception e) {
 //        e.printStackTrace();
+        log.error(e.getMessage());
         AjaxResponse ajaxResponse = new AjaxResponse();
         if (e instanceof SizeLimitExceededException || e instanceof MaxUploadSizeExceededException){
             ajaxResponse.error().setMessage("文件上传超过限制大小(10M)！");
