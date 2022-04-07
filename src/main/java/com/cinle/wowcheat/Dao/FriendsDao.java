@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 @Component
 public interface FriendsDao {
-    int deleteByUuid(@Param("s_uuid")String sUuid ,@Param("f_uuid") String fUuid);
+    int deleteByUuid(@Param("sUuid")String sUuid ,@Param("fUuid") String fUuid);
 
     int insertSelective(Friends record);
 
