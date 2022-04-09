@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.Utils.IpUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
             response.getWriter().write(JSON.toJSONString(ajaxResponse));
             response.getWriter().flush();
             response.getWriter().close();
-            log.info("用户uuid: {} 已从主机 {}:{} 登录服务......",userDetail.getUuid(),request.getRemoteHost(),request.getRemotePort());
+            log.info("用户uuid: {} 已从主机: {}登录服务......",userDetail.getUuid(), IpUtils.getRealIp(request));
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
         }
