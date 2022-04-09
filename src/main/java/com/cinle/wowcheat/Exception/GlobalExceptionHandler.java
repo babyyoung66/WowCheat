@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -38,15 +37,23 @@ import java.util.Set;
 public class GlobalExceptionHandler {
 
     private Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+
+    @ExceptionHandler(CustomerException.class)
+    public AjaxResponse CustomerException(Exception e){
+        log.error(e.getMessage());
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        return ajaxResponse.error().setMessage("系统内部错误，请联系管理员！" + e.getMessage());
+    }
+
     /**
      * validate 数据校验异常统一返回
      *
      * @param ex
-     * @param request
      * @return
      */
     @ExceptionHandler({ConstraintViolationException.class, BindException.class, MethodArgumentNotValidException.class})
-    public AjaxResponse validateException(Exception ex, HttpServletRequest request) {
+    public AjaxResponse validateException(Exception ex) {
         AjaxResponse ajaxResponse = new AjaxResponse();
         //ex.printStackTrace();
         if (ex instanceof ConstraintViolationException) {
@@ -80,6 +87,8 @@ public class GlobalExceptionHandler {
         return null;
 
     }
+
+
 
 
     /**
