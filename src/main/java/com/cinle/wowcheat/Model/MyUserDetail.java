@@ -76,7 +76,7 @@ public class MyUserDetail implements Serializable {
     private String address;
 
     @ApiModelProperty(value = "用户注册时间",readOnly = true)
-    private Date creattime;
+    private Date createTime;
 
     @ApiModelProperty(value = "账号状态，1正常，2限制登录")
     private Integer status;
@@ -176,12 +176,12 @@ public class MyUserDetail implements Serializable {
         this.address = address;
     }
 
-    public Date getCreattime() {
-        return creattime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setCreattime(Date creattime) {
-        this.creattime = creattime;
+    public void setCreateTime(Date creattime) {
+        this.createTime = creattime;
     }
 
     public Integer getStatus() {
@@ -218,7 +218,7 @@ public class MyUserDetail implements Serializable {
                 ", email='" + email + '\'' +
                 ", birthday=" + birthday +
                 ", address='" + address + '\'' +
-                ", creattime=" + creattime +
+                ", creattime=" + createTime +
                 ", status=" + status +
                 ", concatInfo=" + concatInfo +
                 '}';
@@ -240,12 +240,12 @@ public class MyUserDetail implements Serializable {
                 Objects.equals(getEmail(), that.getEmail()) &&
                 Objects.equals(getBirthday(), that.getBirthday()) &&
                 Objects.equals(getAddress(), that.getAddress()) &&
-                Objects.equals(getCreattime(), that.getCreattime()) &&
+                Objects.equals(getCreateTime(), that.getCreateTime()) &&
                 Objects.equals(getStatus(), that.getStatus());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAutoId(), getUuid(), getWowId(), getName(), getPassword(), getSex(), getPhotourl(), getPhonenum(), getEmail(), getBirthday(), getAddress(), getCreattime(), getStatus());
+        return Objects.hash(getAutoId(), getUuid(), getWowId(), getName(), getPassword(), getSex(), getPhotourl(), getPhonenum(), getEmail(), getBirthday(), getAddress(), getCreateTime(), getStatus());
     }
 }
