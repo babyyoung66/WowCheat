@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserServices {
         String uuid = IdUtil.objectId();
         //记录插入时间
         Date dateTime = new Date();
-        record.setCreattime(dateTime);
+        record.setCreateTime(dateTime);
         record.setUuid(uuid);
         return userdetailDao.insertSelective(record);
     }
