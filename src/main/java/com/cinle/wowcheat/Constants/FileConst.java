@@ -6,6 +6,7 @@ package com.cinle.wowcheat.Constants;
  * 文件上传相关静态参数
  */
 public class FileConst {
+    private FileConst(){}
 
     /**
      * 外界访问根路径
@@ -14,9 +15,11 @@ public class FileConst {
 
     /**
      * 文件上传base地址
+     * 外界访问的虚拟url
+     * Nginx代理时请填写Nginx域名端口或ip端口
      */
     public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
-
+    //public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu:1288" + ACCESS_PATH;
 
     /**
      * 文件上传对应的本地路径
