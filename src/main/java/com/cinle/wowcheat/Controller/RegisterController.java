@@ -2,6 +2,7 @@ package com.cinle.wowcheat.Controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Exception.CustomerException;
 import com.cinle.wowcheat.Exception.GlobalExceptionHandler;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.SendMailServices;
@@ -74,7 +75,7 @@ public class RegisterController {
      */
     @ApiOperation(value = "获取邮件验证码",notes = "")
     @PostMapping("/postEmailCode")
-    public AjaxResponse postEmailCode(@RequestBody @Valid RegisterVo user) {
+    public AjaxResponse postEmailCode(@RequestBody @Valid RegisterVo user) throws CustomerException {
         AjaxResponse ajaxResponse = new AjaxResponse();
         String email = user.getEmail();
         if (email == null || StrUtil.hasBlank(email)) {
