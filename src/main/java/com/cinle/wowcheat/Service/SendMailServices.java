@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Enum.MailTypeEnum;
 import com.cinle.wowcheat.Event.SendMailEvent;
+import com.cinle.wowcheat.Exception.CustomerException;
 import com.cinle.wowcheat.Vo.MailMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ public class SendMailServices {
      * @param to
      * @return 返回需要等待的时间，返回0则发送成功
      */
-    public long SendVerifyMail(String to){
+    public long SendVerifyMail(String to) throws CustomerException {
         String code = RandomUtil.randomNumbers(MyConst.EMAIL_CODE_LENGTH);
         long time = verifyService.getEmailCodeTTL(to);
          long timer = MyConst.CODE_KEEPALIVE_TIME - MyConst.EMAIL_CODE_WAIT_TIME;
@@ -71,8 +72,9 @@ public class SendMailServices {
             verifyService.setEmailCode(to,code);
             MailMessage mailMessage = new MailMessage();
             mailMessage.setTo(to).setSubject("【WowCheat】").setContent("【WowCheat】注册验证码:" + code + "，此验证码仅用于WowCheat账号注册，请勿将验证码提供给他人！验证码5分钟内有效，请及时完成注册验证。如非本人操作，请忽略该邮件，祝您生活愉快！");
-            ApplicationEvent event = new SendMailEvent(mailMessage);
-            applicationContext.publishEvent(event);
+//            ApplicationEvent event = new SendMailEvent(mailMessage);
+//            applicationContext.publishEvent(event);
+            sendSimpleMail(mailMessage);
             return 0;
         }
         //计算等待时间
@@ -87,7 +89,7 @@ public class SendMailServices {
      * 使用springEvent异步发送
      */
 
-    public void sendSimpleMail(MailMessage mailMessage) {
+    public void sendSimpleMail(MailMessage mailMessage) throws CustomerException {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(userName);
         message.setTo(mailMessage.getTo());
@@ -95,9 +97,9 @@ public class SendMailServices {
         message.setText(mailMessage.getContent());
         try {
             mailSender.send(message);
-            logger.info("成功发送邮件给{}",  mailMessage.getTo());
         } catch (Exception e) {
             logger.info("发送邮件给{}失败，原因:{}", mailMessage.getTo(), e.getMessage());
+            throw new CustomerException(e.getMessage());
         }
 
     }
