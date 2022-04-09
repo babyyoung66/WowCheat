@@ -15,7 +15,7 @@
         <result column="email" jdbcType="VARCHAR" property="email"/>
         <result column="birthday"  property="birthday"/>
         <result column="address" jdbcType="VARCHAR" property="address"/>
-        <result column="creatTime" property="creattime"/>
+        <result column="createTime" property="createTime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
 
         <association property="concatInfo" javaType="com.cinle.wowcheat.Model.Friends">
@@ -26,7 +26,7 @@
     </resultMap>
     <sql id="Base_Column_List">
     auto_id, uuid, wow_id, `name`, `passWord`, sex, photoUrl, phoneNum, email, birthday, 
-    address, creatTime, `status`
+    address, createTime, `status`
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -38,7 +38,7 @@
     delete from wow_userdetail
     where uuid = #{uuid}
   </delete>
-    <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId"
+    <insert flushCache="true" id="insertSelective" keyColumn="auto_id" keyProperty="autoId"
             parameterType="com.cinle.wowcheat.Model.MyUserDetail" useGeneratedKeys="true">
         insert into wow_userdetail
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -72,8 +72,8 @@
             <if test="address != null">
                 address,
             </if>
-            <if test="creattime != null">
-                creatTime,
+            <if test="createTime != null">
+                createTime,
             </if>
             <if test="status != null">
                 `status`,
@@ -105,13 +105,13 @@
                 #{email,jdbcType=VARCHAR},
             </if>
             <if test="birthday != null">
-                #{birthday,jdbcType=DATE},
+                #{birthday},
             </if>
             <if test="address != null">
                 #{address,jdbcType=VARCHAR},
             </if>
-            <if test="creattime != null">
-                #{creattime,jdbcType=TIMESTAMP},
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
             </if>
             <if test="status != null">
                 #{status,jdbcType=INTEGER},
@@ -144,7 +144,7 @@
                 email = #{email,jdbcType=VARCHAR},
             </if>
             <if test="birthday != null">
-                birthday = #{birthday,jdbcType=DATE},
+                birthday = #{birthday},
             </if>
             <if test="address != null">
                 address = #{address,jdbcType=VARCHAR},
@@ -178,13 +178,9 @@
 
     </select>
     <select id="selectByWowId" resultType="com.cinle.wowcheat.Model.MyUserDetail">
-        select uuid, wow_id, `name`, sex, photoUrl, phoneNum, email, birthday, address,`status`
+        select uuid, wow_id, `name`, sex, photoUrl, phoneNum, email, birthday, address,`status`,createTime
         from wow_userdetail
-        <where>
-            <if test="wowId != null">
-                wow_id = #{wowId}
-            </if>
-        </where>
+        where wow_id = #{wowId}
     </select>
 
     <select useCache="false" id="selectByFriendsUuidList" resultMap="BaseResultMap">
@@ -195,7 +191,6 @@
         <foreach collection="uuidList" item="uuid" index="index" open="(" close=")" separator=",">
             #{uuid}
         </foreach>
-        and f.f_status != 3
     </select>
 
     <select id="selectByUUID" resultType="com.cinle.wowcheat.Model.MyUserDetail">
@@ -204,8 +199,8 @@
         from wow_userdetail
         where uuid = #{uuid}
     </select>
-    <select id="selectByFriendUuid" resultType="com.cinle.wowcheat.Model.MyUserDetail">
-        select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f.f_status,f._remarks,f.lastCheatTime
+    <select id="selectByFriendUuid" resultMap="BaseResultMap">
+        select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f.f_status,f.f_remarks,f.lastCheatTime
         from wow_userdetail u
         left join wow_friends f on f.f_uuid = #{fUuid}  and f.s_uuid = #{sUuid}
         where u.uuid = #{fUuid}
