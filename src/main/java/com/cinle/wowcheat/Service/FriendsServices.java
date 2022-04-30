@@ -22,7 +22,17 @@ public interface FriendsServices {
 
     List<String> selectFriendUuidList(String sUuid);
 
+    /**
+     * 带缓存的查询
+     * 用于验证双方身份
+     */
     Friends findFriend(String sUuid ,  String fUuid);
+
+    /**
+     * 无缓存查询
+     * 用于实时查询
+     */
+    Friends findFriendNonCache(String sUuid, String fUuid);
 
     int updateRemarksByUuid(Friends friends);
 

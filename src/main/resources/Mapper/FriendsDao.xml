@@ -83,7 +83,14 @@
         from wow_friends
         where s_uuid = #{sUuid}
     </select>
-    <select id="findFriend" resultType="com.cinle.wowcheat.Model.Friends">
+    <select useCache="true" id="findFriend" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"></include>
+        from wow_friends
+        where s_uuid = #{sUuid} and f_uuid = #{fUuid}
+    </select>
+
+    <select useCache="false" id="findFriendNonCache" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"></include>
         from wow_friends

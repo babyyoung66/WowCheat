@@ -67,8 +67,9 @@ public class SocketMessage {
         return type;
     }
 
-    public void setType(SocketMessageType type) {
+    public SocketMessage setType(SocketMessageType type) {
         this.type = type;
+        return this;
     }
 
     @Override

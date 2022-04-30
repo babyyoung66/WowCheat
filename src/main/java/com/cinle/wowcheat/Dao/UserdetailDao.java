@@ -25,6 +25,11 @@ public interface UserdetailDao {
 
     List<MyUserDetail> selectByFriendsUuidList(@Param("uuidList") List<String> uuidList ,@Param("sUuid") String sUuid );
 
+    /**
+     * 不包含隐私信息
+     */
+    List<MyUserDetail> selectUsersByUUIDs(@Param("uuidList") List<String> uuidList );
+
     MyUserDetail selectByFriendUuid(@Param("sUuid") String sUuid,@Param("fUuid") String fUuid);
 
     MyUserDetail selectByUUID(@Param("uuid")String uuid);

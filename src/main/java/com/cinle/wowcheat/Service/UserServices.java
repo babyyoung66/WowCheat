@@ -10,7 +10,7 @@ public interface UserServices {
     int deleteByUUID(String uuid);
 
 
-    int insertSelective(MyUserDetail record);
+    MyUserDetail insertSelective(MyUserDetail record);
 
     MyUserDetail selectByPrimaryKey(Integer autoId);
 
@@ -27,6 +27,11 @@ public interface UserServices {
     List<MyUserDetail> selectByWowIdOrEmail(MyUserDetail record);
 
     List<MyUserDetail> selectByFriendsUuidList(List<String> uuidList , String sUuid);
+
+    /**
+     * 不包含隐私信息
+     */
+    List<MyUserDetail> selectUsersByUUIDs(List<String> uuidList );
 
     MyUserDetail selectByFriendUuid(String sUuid, String fUuid);
 

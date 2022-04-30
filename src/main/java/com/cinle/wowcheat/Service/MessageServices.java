@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Service;
 
 import com.cinle.wowcheat.Constants.MessageConst;
-import com.cinle.wowcheat.Model.CustomerMessage;
+import com.cinle.wowcheat.Model.CheatMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -28,17 +27,17 @@ public class MessageServices {
     /**
      * @return 返回收发双方全部消息
      */
-    public List<CustomerMessage> findAllByUUID(CustomerMessage customerMessage, String collectionName) {
+    public List<CheatMessage> findAllByUUID(CheatMessage cheatMessage, String collectionName) {
         //or查询,只查询180天内的
         Query query = new Query(new Criteria().orOperator(
-                Criteria.where("from").is(customerMessage.getFrom())
-                        .and("to").is(customerMessage.getTo()),
-                Criteria.where("from").is(customerMessage.getTo())
-                        .and("to").is(customerMessage.getFrom())
+                Criteria.where("from").is(cheatMessage.getFrom())
+                        .and("to").is(cheatMessage.getTo()),
+                Criteria.where("from").is(cheatMessage.getTo())
+                        .and("to").is(cheatMessage.getFrom())
 
         ).and("time").gte(getQueryStartTime()) //筛选时间
         );
-        return mongoTemplate.find(query, CustomerMessage.class, collectionName);
+        return mongoTemplate.find(query, CheatMessage.class, collectionName);
     }
 
     /**
@@ -51,38 +50,38 @@ public class MessageServices {
     }
 
     /**
-     * @param customerMessage
+     * @param cheatMessage
      * @param collectionName  集合名称
      * @return 传入前一次查询的最早的一条记录
      * 以该条记录的时间作为查询的结束范围
      */
-    public List<CustomerMessage> findMessageByPages(CustomerMessage customerMessage, String collectionName) {
+    public List<CheatMessage> findMessageByPages(CheatMessage cheatMessage, String collectionName) {
         Date date;
         //时间为空则默认当前时间
-        if (customerMessage.getTime() == null || customerMessage.getTime().equals("")) {
+        if (cheatMessage.getTime() == null || cheatMessage.getTime().equals("")) {
             date = new Date();
         } else {
-            date = customerMessage.getTime(); //将日期格式转换为系统可识别的
+            date = cheatMessage.getTime(); //将日期格式转换为系统可识别的
         }
         //转换成Timestamp，直接用date无法精确到毫秒
         Timestamp timestamp = new Timestamp(date.getTime());
         Query query = null;
         //群聊
-        if ("group".equals(customerMessage.getMsgType())) {
+        if ("group".equals(cheatMessage.getMsgType())) {
             query = new Query(
                     new Criteria().orOperator(
-                            Criteria.where("to").is(customerMessage.getTo())
+                            Criteria.where("to").is(cheatMessage.getTo())
                     ).and("time").gte(getQueryStartTime()).lt(timestamp)
             );
         }
-        if ("personal".equals(customerMessage.getMsgType())){
+        if ("personal".equals(cheatMessage.getMsgType())){
             //个人
             query = new Query(
                     new Criteria().orOperator(
-                            Criteria.where("from").is(customerMessage.getFrom())
-                                    .and("to").is(customerMessage.getTo()),
-                            Criteria.where("from").is(customerMessage.getTo())
-                                    .and("to").is(customerMessage.getFrom())
+                            Criteria.where("from").is(cheatMessage.getFrom())
+                                    .and("to").is(cheatMessage.getTo()),
+                            Criteria.where("from").is(cheatMessage.getTo())
+                                    .and("to").is(cheatMessage.getFrom())
                     ).and("time").gte(getQueryStartTime()).lt(timestamp)
             );
         }
@@ -90,15 +89,15 @@ public class MessageServices {
             return null;
         }
         query.with(Sort.by(Sort.Order.desc("time"))).limit(MessageConst.Page_Num);//按时间降序取前40条
-        List<CustomerMessage> list = mongoTemplate.find(query, CustomerMessage.class, collectionName);
+        List<CheatMessage> list = mongoTemplate.find(query, CheatMessage.class, collectionName);
         Collections.reverse(list);//由于是降序查询，需要反转回降序给前端
         return list;
     }
 
-    public int saveMessage(CustomerMessage customerMessage, String collectionName) {
+    public int saveMessage(CheatMessage cheatMessage, String collectionName) {
         Date now = new Date();
-        customerMessage.setTime(now);
-        CustomerMessage result = mongoTemplate.save(customerMessage, collectionName);
+        cheatMessage.setTime(now);
+        CheatMessage result = mongoTemplate.save(cheatMessage, collectionName);
         return result == null ? 0 : 1;
 
     }
@@ -108,22 +107,22 @@ public class MessageServices {
         mongoTemplate.remove(_id, collectionName);
     }
 
-    public List<CustomerMessage> findGroupByPage(CustomerMessage customerMessage, String collectionName) {
+    public List<CheatMessage> findGroupByPage(CheatMessage cheatMessage, String collectionName) {
         Date date;
         //时间为空则默认当前时间
-        if (customerMessage.getTime() == null || customerMessage.getTime().equals("")) {
+        if (cheatMessage.getTime() == null || cheatMessage.getTime().equals("")) {
             date = new Date();
         } else {
-            date = customerMessage.getTime(); //将日期格式转换为系统可识别的
+            date = cheatMessage.getTime(); //将日期格式转换为系统可识别的
         }
         //转换成Timestamp，直接用date无法精确到毫秒
         Timestamp timestamp = new Timestamp(date.getTime());
         Query query = new Query(
-                Criteria.where("to").is(customerMessage.getTo())
+                Criteria.where("to").is(cheatMessage.getTo())
                         .and("time").gte(getQueryStartTime()).lt(timestamp)
         );
         query.with(Sort.by(Sort.Order.desc("time"))).limit(MessageConst.Page_Num * 2);//按时间降序取前80条
-        List<CustomerMessage> list = mongoTemplate.find(query, CustomerMessage.class, collectionName);
+        List<CheatMessage> list = mongoTemplate.find(query, CheatMessage.class, collectionName);
         Collections.reverse(list);//由于是降序查询，需要反转回降序给前端
         return list;
     }

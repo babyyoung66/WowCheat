@@ -1,9 +1,11 @@
 package com.cinle.wowcheat.Event;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.Model.CheatMessage;
 import com.cinle.wowcheat.Model.FriendsRequest;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendRequestServices;
+import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.WebSocket.SocketConstants;
@@ -31,6 +33,8 @@ public class SendSocketMessageEventListener {
     SimpMessagingTemplate messagingTemplate;
     @Autowired
     FriendRequestServices friendRequestServices;
+    @Autowired
+    MessageServices messageServices;
 
 
     @Async("AsyncExecutor")
@@ -39,6 +43,7 @@ public class SendSocketMessageEventListener {
         SocketMessage socketMessage = (SocketMessage) event.getSource();
         switch (socketMessage.getType()) {
             case cheat:
+                sendCheatMessage(socketMessage);
                 break;
             case notice:
                 sendTopic(socketMessage);
@@ -54,6 +59,12 @@ public class SendSocketMessageEventListener {
                 break;
         }
 
+    }
+
+    private void sendCheatMessage(SocketMessage socketMessage){
+        CheatMessage cheatMessage = (CheatMessage) socketMessage.getMessage();
+        messageServices.saveMessage(cheatMessage,cheatMessage.getMsgType());
+        messagingTemplate.convertAndSendToUser(cheatMessage.getTo(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSON(socketMessage));
     }
 
     /**
@@ -79,10 +90,7 @@ public class SendSocketMessageEventListener {
      */
     private void sendFriendRequest(SocketMessage socketMessage) {
         FriendsRequest request = (FriendsRequest) socketMessage.getMessage();
-        //
-        if (request.getRequestStatus() == 1) {
-            return;
-        }
+
         FriendsRequest toShelf = friendRequestServices.selectWithUserInfoByEachUuid(request.getRequestUuid(), request.getReceiverUuid(), request.getReceiverUuid());
         socketMessage.setMessage(toShelf);
         messagingTemplate.convertAndSendToUser(request.getRequestUuid(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSON(socketMessage));

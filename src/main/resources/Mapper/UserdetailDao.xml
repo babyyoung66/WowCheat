@@ -17,6 +17,9 @@
         <result column="address" jdbcType="VARCHAR" property="address"/>
         <result column="createTime" property="createTime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="lastLoginTime" property="lastLoginTime"/>
+        <result column="lastLoginIp"  property="lastLoginIp"/>
+
 
         <association property="concatInfo" javaType="com.cinle.wowcheat.Model.Friends">
             <result column="f_remarks" jdbcType="VARCHAR" property="fremarks"/>
@@ -26,7 +29,7 @@
     </resultMap>
     <sql id="Base_Column_List">
     auto_id, uuid, wow_id, `name`, `passWord`, sex, photoUrl, phoneNum, email, birthday, 
-    address, createTime, `status`
+    address, createTime, `status`,lastLoginTime,lastLoginIp
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
@@ -38,7 +41,7 @@
     delete from wow_userdetail
     where uuid = #{uuid}
   </delete>
-    <insert flushCache="true" id="insertSelective" keyColumn="auto_id" keyProperty="autoId"
+    <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId"
             parameterType="com.cinle.wowcheat.Model.MyUserDetail" useGeneratedKeys="true">
         insert into wow_userdetail
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -152,6 +155,12 @@
             <if test="status != null">
                 `status` = #{status,jdbcType=INTEGER},
             </if>
+            <if test="lastLoginTime != null">
+                lastLoginTime = #{lastLoginTime},
+            </if>
+            <if test="lastLoginIp != null">
+                lastLoginIp = #{lastLoginIp},
+            </if>
         </set>
         where uuid = #{uuid}
     </update >
@@ -178,7 +187,7 @@
 
     </select>
     <select id="selectByWowId" resultType="com.cinle.wowcheat.Model.MyUserDetail">
-        select uuid, wow_id, `name`, sex, photoUrl, phoneNum, email, birthday, address,`status`,createTime
+        select uuid, wow_id, `name`, sex, photoUrl, phoneNum, email, birthday, address,`status`,createTime,lastLoginTime,lastLoginIp
         from wow_userdetail
         where wow_id = #{wowId}
     </select>
@@ -193,13 +202,24 @@
         </foreach>
     </select>
 
+    <select id="selectUsersByUUIDs" resultType="com.cinle.wowcheat.Model.MyUserDetail">
+        select uuid, wow_id, `name`, sex, photoUrl, birthday, address
+        from wow_userdetail
+        where uuid in
+        <foreach collection="uuidList" item="uuid" index="index" open="(" close=")" separator=",">
+            #{uuid}
+        </foreach>
+    </select>
+
+
+
     <select id="selectByUUID" resultType="com.cinle.wowcheat.Model.MyUserDetail">
         select
         <include refid="Base_Column_List"></include>
         from wow_userdetail
         where uuid = #{uuid}
     </select>
-    <select id="selectByFriendUuid" resultMap="BaseResultMap">
+    <select useCache="false" id="selectByFriendUuid" resultMap="BaseResultMap">
         select u.auto_id, u.uuid, u.wow_id, u.`name`, u.sex, u.photoUrl, u.phoneNum, u.email, u.birthday,u.address,f.f_status,f.f_remarks,f.lastCheatTime
         from wow_userdetail u
         left join wow_friends f on f.f_uuid = #{fUuid}  and f.s_uuid = #{sUuid}

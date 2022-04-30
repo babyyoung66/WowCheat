@@ -11,7 +11,7 @@ import java.util.Date;
  * @Time 2022/3/3 15:26
  */
 //@Document(collection = "message") //弃用，使用MongoTemplate自定义选择collection
-public class CustomerMessage {
+public class CheatMessage {
 
     @Id
     private String _id;
@@ -45,7 +45,7 @@ public class CustomerMessage {
         return from;
     }
 
-    public CustomerMessage setFrom(String from) {
+    public CheatMessage setFrom(String from) {
         this.from = from;
         return this;
     }
@@ -54,7 +54,7 @@ public class CustomerMessage {
         return to;
     }
 
-    public CustomerMessage setTo(String to) {
+    public CheatMessage setTo(String to) {
         this.to = to;
         return this;
     }
@@ -63,7 +63,7 @@ public class CustomerMessage {
         return content;
     }
 
-    public CustomerMessage setContent(String content) {
+    public CheatMessage setContent(String content) {
         this.content = content;
         return this;
     }
@@ -72,7 +72,7 @@ public class CustomerMessage {
         return contentType;
     }
 
-    public CustomerMessage setContentType(String contentType) {
+    public CheatMessage setContentType(String contentType) {
         this.contentType = contentType;
         return this;
     }
@@ -82,7 +82,7 @@ public class CustomerMessage {
         return time;
     }
 
-    public CustomerMessage setTime(Date time) {
+    public CheatMessage setTime(Date time) {
         this.time = time;
         return this;
     }
@@ -91,7 +91,7 @@ public class CustomerMessage {
         return msgType;
     }
 
-    public CustomerMessage setMsgType(String msgType) {
+    public CheatMessage setMsgType(String msgType) {
         this.msgType = msgType;
         return this;
     }
@@ -100,7 +100,7 @@ public class CustomerMessage {
         return fileDetail;
     }
 
-    public CustomerMessage setFileDetail(FileDetail fileDetail) {
+    public CheatMessage setFileDetail(FileDetail fileDetail) {
         this.fileDetail = fileDetail;
         return this;
     }

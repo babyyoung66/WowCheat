@@ -2,6 +2,7 @@ package com.cinle.wowcheat.Controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Event.RegisterEvent;
 import com.cinle.wowcheat.Exception.CustomerException;
 import com.cinle.wowcheat.Exception.GlobalExceptionHandler;
 import com.cinle.wowcheat.Model.MyUserDetail;
@@ -13,6 +14,8 @@ import com.cinle.wowcheat.Vo.RegisterVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +47,9 @@ public class RegisterController {
     @Autowired
     VerifyService verifyService;
 
+    @Autowired
+    ApplicationContext applicationContext;
+
 
 
     /**
@@ -63,8 +69,14 @@ public class RegisterController {
         if (verifyService.isEmailCheckSuccess(user.getEmail())){
             //设置默认头像
             user.setPhotourl(FileConst.DEFAULT_PHOTO_URL);
-            userServices.insertSelective(user);
-            return ajaxResponse.success().setMessage("注册成功!");
+            MyUserDetail usr = userServices.insertSelective(user);
+            if (usr != null){
+                //添加默认好友、加入默认群聊
+                ApplicationEvent event = new RegisterEvent(usr);
+                applicationContext.publishEvent(event);
+                
+                return ajaxResponse.success().setMessage("注册成功!");
+            }
         }
         return ajaxResponse.error().setMessage("注册失败,请重新尝试!");
     }

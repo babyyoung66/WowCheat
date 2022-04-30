@@ -1,7 +1,7 @@
 package com.cinle.wowcheat.Model;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * wow_userfile_detail
@@ -20,7 +20,7 @@ public class UserFileDetail implements Serializable {
 
     private String fileType;
 
-    private Timestamp uploadTime;
+    private Date uploadTime;
 
     public int getAutoId() {
         return autoId;
@@ -62,11 +62,11 @@ public class UserFileDetail implements Serializable {
         this.fileType = fileType;
     }
 
-    public Timestamp getUploadTime() {
+    public Date getUploadTime() {
         return uploadTime;
     }
 
-    public void setUploadTime(Timestamp uploadTime) {
+    public void setUploadTime(Date uploadTime) {
         this.uploadTime = uploadTime;
     }
 

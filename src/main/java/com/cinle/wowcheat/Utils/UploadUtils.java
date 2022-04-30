@@ -91,12 +91,19 @@ public class UploadUtils {
         return "系统不允许该类型文件上传";
     }
 
-    public static void uploadFile(MultipartFile file, String filePath, FileType type) throws UploadFileException {
+    /**
+     * @param file
+     * @param filePath
+     * @param type
+     * @return 真实保存地址
+     * @throws UploadFileException
+     */
+    public static String uploadFile(MultipartFile file, String filePath, FileType type) throws UploadFileException {
         if (file == null){
             throw new UploadFileException("请选择文件！");
         }
-
-        Path path = Paths.get(FileConst.LOCAL_PATH + filePath);
+        String realPath = FileConst.LOCAL_PATH + filePath;
+        Path path = Paths.get(realPath);
         boolean checkSize = cheekSize(file.getSize(), type);
         if (!checkSize) {
             throw new UploadFileException(getLimitString(type) + "!");
@@ -107,7 +114,7 @@ public class UploadUtils {
                 path.toFile().getParentFile().mkdirs();
             }
             file.transferTo(path);
-
+            return realPath;
         } catch (Exception e) {
             String error = e.getMessage();
             if (e instanceof NoSuchFileException){
@@ -130,8 +137,9 @@ public class UploadUtils {
             try {
                 Files.delete(path);
             } catch (IOException e) {
+                e.printStackTrace();
                 log.error("删除文件失败,文件路径为: {},原因: {}", realPath, e.getMessage());
-                throw new FileUploadException("文件删除失败！\n" + e.getMessage());
+                //throw new FileUploadException("文件删除失败！\n" + e.getMessage());
             }
 
         }

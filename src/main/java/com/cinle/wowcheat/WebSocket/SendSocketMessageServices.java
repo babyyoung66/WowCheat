@@ -1,9 +1,8 @@
 package com.cinle.wowcheat.WebSocket;
 
-import com.cinle.wowcheat.Model.CustomerMessage;
+import com.cinle.wowcheat.Model.CheatMessage;
+import com.cinle.wowcheat.Model.MyUserDetail;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.security.Principal;
 
 /**
  * @Author JunLe
@@ -13,12 +12,16 @@ import java.security.Principal;
  */
 public interface SendSocketMessageServices {
 
-    void sendToUser(SocketUserPrincipal principal,CustomerMessage customerMessage);
+    void sendText(SocketUserPrincipal principal, CheatMessage cheatMessage);
 
-    void sendToGroup(SocketUserPrincipal principal,CustomerMessage customerMessage);
+    //void sendToUser(SocketUserPrincipal principal, CheatMessage cheatMessage);
 
-    void sendTopic(SocketUserPrincipal principal,CustomerMessage customerMessage);
+    //void sendToGroup(SocketUserPrincipal principal, CheatMessage cheatMessage);
 
-    void sendFile(SocketUserPrincipal principal, CustomerMessage customerMessage, MultipartFile file);
 
+    void sendTopic(SocketUserPrincipal principal, CheatMessage cheatMessage);
+
+    void sendFile(SocketUserPrincipal principal, CheatMessage cheatMessage, MultipartFile file);
+
+    void sendWelcomeMessage(MyUserDetail user);
 }

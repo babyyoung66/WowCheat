@@ -10,7 +10,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -35,11 +34,11 @@ public class MyUserDetail implements Serializable {
     @Length(min = 5,max = 18,message = "Wow号长度5-18位!")
     private String wowId;
 
-    @ApiModelProperty(value = "用户昵称，限制1-12位" )
+    @ApiModelProperty(value = "用户昵称，限制1-18位" )
     @NotBlank(message = "昵称不能为空!")
     @Pattern(regexp = "[^<>#^\\r\\t\\n*&\\\\/$]*?",
             message = "昵称不能包含特殊符号!")
-    @Length(min = 1,max = 12,message = "昵称长度1-12位!")
+    @Length(min = 1,max = 18,message = "昵称长度1-18位!")
     private String name;
 
 
@@ -80,6 +79,11 @@ public class MyUserDetail implements Serializable {
 
     @ApiModelProperty(value = "账号状态，1正常，2限制登录")
     private Integer status;
+
+    @JSONField(format="yyyy-MM-dd hh:mm:ss")
+    private Date lastLoginTime;
+
+    private String lastLoginIp;
 
     /**
      * 多表查询字段
@@ -200,6 +204,22 @@ public class MyUserDetail implements Serializable {
         this.concatInfo = concatInfo;
     }
 
+    public Date getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    public void setLastLoginTime(Date lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
+    }
+
+    public String getLastLoginIp() {
+        return lastLoginIp;
+    }
+
+    public void setLastLoginIp(String lastLoginIp) {
+        this.lastLoginIp = lastLoginIp;
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -218,8 +238,10 @@ public class MyUserDetail implements Serializable {
                 ", email='" + email + '\'' +
                 ", birthday=" + birthday +
                 ", address='" + address + '\'' +
-                ", creattime=" + createTime +
+                ", createTime=" + createTime +
                 ", status=" + status +
+                ", lastLoginTime=" + lastLoginTime +
+                ", lastLoginIp='" + lastLoginIp + '\'' +
                 ", concatInfo=" + concatInfo +
                 '}';
     }

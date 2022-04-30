@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserServices {
     }
 
     @Override
-    public int insertSelective(MyUserDetail record) {
+    public MyUserDetail insertSelective(MyUserDetail record) {
         BCryptPasswordEncoder bcry = new BCryptPasswordEncoder();
         record.setPassword(bcry.encode(record.getPassword()));
         /*使用hutool工具生成uuid*/
@@ -42,7 +42,11 @@ public class UserServiceImpl implements UserServices {
         Date dateTime = new Date();
         record.setCreateTime(dateTime);
         record.setUuid(uuid);
-        return userdetailDao.insertSelective(record);
+        int res = userdetailDao.insertSelective(record);
+        if (res > 0){
+            return record;
+        }
+        return null;
     }
 
     @Override
@@ -72,6 +76,9 @@ public class UserServiceImpl implements UserServices {
 
     @Override
     public List<MyUserDetail> selectByFriendsUuidList(List<String> uuidList, String sUuid) {
+        if (uuidList == null || uuidList.size() == 0){
+            return new ArrayList<>();
+        }
         //脱敏工作
         List<MyUserDetail> users = userdetailDao.selectByFriendsUuidList(uuidList, sUuid);
         List<MyUserDetail> list = new ArrayList<>();
@@ -83,6 +90,14 @@ public class UserServiceImpl implements UserServices {
             });
         }
         return list;
+    }
+
+    @Override
+    public List<MyUserDetail> selectUsersByUUIDs(List<String> uuidList) {
+        if (uuidList == null || uuidList.size() == 0){
+            return new ArrayList<>();
+        }
+        return userdetailDao.selectUsersByUUIDs(uuidList);
     }
 
     @Override

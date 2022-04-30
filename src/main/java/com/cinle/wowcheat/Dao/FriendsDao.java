@@ -21,7 +21,11 @@ public interface FriendsDao {
 
     List<String> selectFriendUuidList(String sUuid);
 
+    //带缓存
     Friends findFriend(@Param("sUuid")String sUuid ,@Param("fUuid") String fUuid);
+
+    //不带缓存
+    Friends findFriendNonCache(@Param("sUuid")String sUuid ,@Param("fUuid") String fUuid);
 
     int updateRemarksByUuid(Friends friends);
 

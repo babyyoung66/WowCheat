@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.Length;
@@ -22,11 +23,11 @@ public class UserEditVo {
     @ApiModelProperty(value = "用户唯一标识，后台认证体获取",readOnly = true)
     private String uuid;
 
-    @ApiModelProperty(value = "用户昵称，限制1-12位" )
+    @ApiModelProperty(value = "用户昵称，限制1-18位" )
     @NotBlank(message = "昵称不能为空!")
     @Pattern(regexp = "[^<>#^\\r\\t\\n*&\\\\/$]*?",
             message = "昵称不能包含特殊符号!")
-    @Length(min = 1,max = 12,message = "昵称长度1-12位!")
+    @Length(min = 1,max = 18,message = "昵称长度1-18位!")
     private String name;
 
 
@@ -39,10 +40,12 @@ public class UserEditVo {
 
 
     @ApiModelProperty(value = "用户生日")
-    @Past
+    @JSONField(format="yyyy-MM-dd")
+    @Past(message = "生日只能是一个过去的时间！")
     private Date birthday;
 
     @ApiModelProperty(value = "用户地址")
+    @Length(max = 48,message = "地区不超过48字符！")
     private String address;
 
     public String getUuid() {

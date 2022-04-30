@@ -2,10 +2,13 @@ package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Dao.UserFileDetailDao;
 import com.cinle.wowcheat.Enum.FileType;
+import com.cinle.wowcheat.Event.ImagePressEvent;
 import com.cinle.wowcheat.Event.UserChangeEvent;
 import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.MyUserDetail;
+import com.cinle.wowcheat.Model.UserFileDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
@@ -28,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -48,6 +52,9 @@ public class UserController {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private UserFileDetailDao fileDetailDao;
 
     /**
      * 根据wowId查找用户
@@ -70,8 +77,19 @@ public class UserController {
         return ajaxResponse.success();
     }
 
+    @PostMapping("/queryUserByUid")
+    public AjaxResponse queryUserByUuid(
+            @NotBlank(message = "UUID不能为空!")
+                    String uuid) {
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        MyUserDetail usr = userServices.selectByUUID(uuid);
+        if (usr != null) {
+            ajaxResponse.setData(JSON.toJSON(usr));
+        }
+        return ajaxResponse.success();
+    }
     /**
-     * 修改密码
+     * 修改密码，x-www-form请求
      * 参数格式：
      * {
      * "name": "123",
@@ -143,7 +161,7 @@ public class UserController {
      * 修改头像
      *
      * @param file
-     * @return
+     * @return 返回头像新地址
      * @throws UploadFileException
      */
     @PostMapping("/editPhoto")
@@ -155,21 +173,35 @@ public class UserController {
             return response.error().setCode(501).setMessage("不允许上传该类型文件!");
         }
         MyUserDetail usr = userServices.selectByUUID(uuid);
-        //将旧头像删除
-        UploadUtils.removeFile(usr.getPhotourl());
+
         //上传新头像
-        String name = file.getOriginalFilename();
-        String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
+        String fileName = file.getOriginalFilename();
+        //所有图片统一转成jpg格式，然后进行压缩
+        String suffixName = ".jpg";
         String uuName = UUID.randomUUID().toString();
-        String uploadPath = FileConst.IMAGE_PATH + uuName + suffixName;
+        String uploadPath = FileConst.PHOTO_PATH + uuName + suffixName;
         String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
-        UploadUtils.uploadFile(file, uploadPath, FileType.image);
+        //真实保存地址
+        String realPath = UploadUtils.uploadFile(file, uploadPath, FileType.image);
         //存入数据库
         MyUserDetail newInfo = new MyUserDetail();
         newInfo.setPhotourl(fileUrl);
         newInfo.setUuid(uuid);
         userServices.updateByUUIDSelective(newInfo);
+        //压缩头像
+        UserFileDetail fileDetail = new UserFileDetail();
+        fileDetail.setUploadTime(new Date());
+        fileDetail.setFileName(fileName);
+        fileDetail.setFilePath(realPath);
+        fileDetail.setUuid(uuid);
+        fileDetail.setFileType(FileType.image.toString());
+        //fileDetailDao.insertSelective(fileDetail);
+        //发送图片压缩事件,
+        ApplicationEvent event = new ImagePressEvent(fileDetail);
+        applicationContext.publishEvent(event);
 
+        //将旧头像删除
+        UploadUtils.removeFile(usr.getPhotourl());
         usr.setPhotourl(fileUrl);
         response.success().setMessage("修改成功！").setData(JSON.toJSON(usr));//返回更新后的数据
         return response;
@@ -180,30 +212,14 @@ public class UserController {
      * 按需更改基本信息
      * 传入参数不为空则修改
      *
-     * @param file 用户头像
      * @param user
      * @return 返回本人新资料
      */
-    @PostMapping("/edit")
-    public AjaxResponse editUserInfo(@Valid UserEditVo user, MultipartFile file) throws UploadFileException {
+    @PostMapping("/editInfo")
+    public AjaxResponse editUserInfo(@RequestBody @Valid UserEditVo user) throws UploadFileException {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         user.setUuid(uuid);
-        if (file != null && file.getSize() > 0) {
-            boolean checkType = UploadUtils.checkFileType(file, FileType.image);
-            if (!checkType) {
-                return response.error().setCode(501).setMessage("不允许上传该类型文件!");
-            }
-            String FileName = file.getOriginalFilename();
-            String suffixName = FileName.substring(FileName.lastIndexOf("."));       //获取文件后缀
-            String uuName = UUID.randomUUID().toString();
-            String uploadPath = FileConst.IMAGE_PATH + uuName + suffixName;
-            String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
-            UploadUtils.uploadFile(file, uploadPath, FileType.image);
-
-            user.setPhotourl(fileUrl);
-
-        }
 
         MyUserDetail userDetail = new MyUserDetail();
         BeanUtils.copyProperties(user, userDetail);

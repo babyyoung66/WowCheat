@@ -59,6 +59,10 @@ public class FriendsServicesImpl implements FriendsServices {
     }
 
     @Override
+    public Friends findFriendNonCache(String sUuid, String fUuid) {
+        return friendsDao.findFriend(sUuid, fUuid);
+    }
+    @Override
     public int updateRemarksByUuid(Friends friends) {
         return friendsDao.updateRemarksByUuid(friends);
     }
