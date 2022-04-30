@@ -31,7 +31,7 @@ public class FileConst {
      */
     public static final String DEFAULT_PHOTO_URL = "../static/cheat.png";
 
-    public static final String IMAGE_PATH = "image/";
+    public static final String PHOTO_PATH = "image/";
 
     /**
      * 聊天文件存放根路径
