@@ -28,6 +28,7 @@
             <result column="join_time" property="joinTime"/>
             <result column="inviter_uuid" property="inviterUuid"/>
             <result column="member_status" property="memberStatus"/>
+            <result column="last_cheat_time" property="lastCheatTime"/>
         </association>
 
     </resultMap>
@@ -121,7 +122,7 @@
 
     <select id="selectGroupsByUserUuid" resultMap="BaseResultMap">
         select
-        uuid, `name`, create_time, creator_uuid, photourl, group_status,m.group_remarks, m.join_time, m.inviter_uuid, m.member_status
+        uuid, `name`, create_time, creator_uuid, photourl, group_status,m.group_remarks, m.join_time, m.inviter_uuid, m.member_status,m.last_cheat_time
         from wow_groups g
         left join wow_groups_member m on g.uuid = m.group_uuid and m.user_uuid = #{userUuid}
         where g.uuid in (select group_uuid

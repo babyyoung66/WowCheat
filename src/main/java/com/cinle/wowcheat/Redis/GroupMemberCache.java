@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Redis;
 
+import com.cinle.wowcheat.Dao.GroupMemberDao;
 import com.cinle.wowcheat.Model.GroupMember;
 import com.cinle.wowcheat.Service.GroupMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class GroupMemberCache {
     @Resource
     private RedisTemplate redisTemplate;
     @Autowired
-    private GroupMemberService groupMemberService;
+    private GroupMemberDao groupMemberDao;
 
 
     public Set<String> getGroupMemberIdsByGroupId(String groupId) {
@@ -39,10 +40,10 @@ public class GroupMemberCache {
         return set.size() > 0 ? set : initAdminIds(groupId);
     }
 
-    public long updateGroupMember(String groupId, List<String> groupMembers) {
+    public long updateGroupMemberIds(String groupId, List<String> groupMemberIds) {
         String key = prefix_KEY_MEMBER + groupId;
         long count = 0;
-        for (String memberId : groupMembers) {
+        for (String memberId : groupMemberIds) {
             redisTemplate.opsForSet().add(key, memberId);
             count++;
         }
@@ -94,12 +95,12 @@ public class GroupMemberCache {
                 if (set != null && set.size() > 0) {
                     return set1;
                 }
-                List<String> members = groupMemberService.getMemberIdListByGroupId(groupId);
+                List<String> members = groupMemberDao.getMemberIdListByGroupId(groupId);
                 if (members == null || members.size() <= 0) {
                     //群组不存在或者无组员，随便存一个，防止非法请求
                     members = Arrays.asList("default");
                 }
-                updateGroupMember(groupId, members);
+                updateGroupMemberIds(groupId, members);
             }
         }
         return redisTemplate.opsForSet().members(key);
@@ -116,7 +117,7 @@ public class GroupMemberCache {
                 if (set != null && set.size() > 0) {
                     return set1;
                 }
-                List<String> ids = groupMemberService.getAdminIdListByGroupId(groupId);
+                List<String> ids = groupMemberDao.getAdminIdListByGroupId(groupId);
                 if (ids == null || ids.size() <= 0) {
                     //群组不存在或者无组员，随便存一个，防止非法请求
                     ids = Arrays.asList("default");

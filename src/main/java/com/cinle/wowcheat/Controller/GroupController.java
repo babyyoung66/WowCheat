@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.Constants.MessageConst;
 import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.Group;
 import com.cinle.wowcheat.Model.GroupMember;
@@ -39,9 +40,8 @@ public class GroupController {
         List<Group> groups = groupServices.selectGroupsByUserUuid(uuid);
         for (int i = 0; i < groups.size(); i++) {
             Group g = groups.get(i);
-
             Date cheatTime = g.getConcatInfo().getLastCheatTime();
-            Timestamp time = new Timestamp(new Date().getTime());
+            Timestamp time = new Timestamp(MessageConst.getQueryStartTime().getTime());
             if (cheatTime != null){
                 time = new Timestamp(cheatTime.getTime());
             }

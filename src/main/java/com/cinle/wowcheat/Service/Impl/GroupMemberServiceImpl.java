@@ -2,11 +2,13 @@ package com.cinle.wowcheat.Service.Impl;
 
 import com.cinle.wowcheat.Dao.GroupMemberDao;
 import com.cinle.wowcheat.Model.GroupMember;
+import com.cinle.wowcheat.Redis.GroupMemberCache;
 import com.cinle.wowcheat.Service.GroupMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class GroupMemberServiceImpl implements GroupMemberService {
 
     @Autowired
     GroupMemberDao memberDao;
+    @Autowired
+    GroupMemberCache groupMemberCache;
+
     @Override
     public int deleteByPrimaryKey(Integer autoId) {
         return memberDao.deleteByPrimaryKey(autoId);
@@ -27,6 +32,9 @@ public class GroupMemberServiceImpl implements GroupMemberService {
     @Override
     public int insert(GroupMember record) {
         record.setJoinTime(new Date());
+        //更新redis
+        groupMemberCache.updateGroupMemberIds(record.getGroupUuid(), Arrays.asList(record.getUserUuid()));
+
         return memberDao.insert(record);
     }
 
@@ -93,6 +101,8 @@ public class GroupMemberServiceImpl implements GroupMemberService {
 
     @Override
     public int exitGroup(String userId, String groupId) {
+        //更新redis
+        groupMemberCache.deleteGroupMemberId(groupId, Arrays.asList(userId));
         return memberDao.exitGroup(userId, groupId);
     }
 
