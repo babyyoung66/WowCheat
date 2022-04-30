@@ -1,4 +1,7 @@
 # WowCheat
+### 前端代码
+* https://github.com/babyyoung66/WowCheatUI
+
 ### 数据库
 * MySQL 8.0+
 * MongoDB 5.0
@@ -15,7 +18,5 @@
 * 修改MySQL、MongoDB、Redis连接信息
 * 修改 FileConst 类中的相关参数
 
-### 前端代码
-* https://github.com/babyyoung66/WowCheatUI
 
 
