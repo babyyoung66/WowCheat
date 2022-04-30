@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cinle.wowcheat.Dao.GroupDao">
+    <resultMap id="BaseResultMap" type="com.cinle.wowcheat.Model.Group">
+        <id column="auto_id" jdbcType="INTEGER" property="autoId"/>
+        <result column="uuid" jdbcType="VARCHAR" property="uuid"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="creator_uuid" jdbcType="VARCHAR" property="creatorUuid"/>
+        <result column="photourl" jdbcType="VARCHAR" property="photourl"/>
+        <result column="group_status" jdbcType="INTEGER" property="groupStatus"/>
+
+        <!--多表查询管理员数量 -->
+        <association property="adminTotal" column="uuid" javaType="integer" select="com.cinle.wowcheat.Dao.GroupMemberDao.getAdminTotalByGroupId">
+        </association>
+        <!--多表查询成员数量 -->
+        <association property="memberTotal" column="uuid" javaType="integer" select="com.cinle.wowcheat.Dao.GroupMemberDao.getMemberTotalByGroupId">
+        </association>
+        <!-- 获取所有成员uuid-->
+        <association property="memberIds" column="uuid"  javaType="arraylist" select="com.cinle.wowcheat.Dao.GroupMemberDao.getMemberIdListByGroupId">
+        </association>
+        <!-- 获取所有管理员uuid-->
+        <association property="adminIds" column="uuid"  javaType="arraylist" select="com.cinle.wowcheat.Dao.GroupMemberDao.getAdminIdListByGroupId">
+        </association>
+
+        <association property="concatInfo"  javaType="com.cinle.wowcheat.Model.GroupMember" >
+            <result column="group_remarks" property="remarks"/>
+            <result column="join_time" property="joinTime"/>
+            <result column="inviter_uuid" property="inviterUuid"/>
+            <result column="member_status" property="memberStatus"/>
+        </association>
+
+    </resultMap>
+    <sql id="Base_Column_List">
+    auto_id, uuid, `name`, create_time, creator_uuid, photourl, group_status
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.cinle.wowcheat.Model.Group">
+        select
+        <include refid="Base_Column_List"/>
+        from wow_groups
+        where auto_id = #{autoId,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from wow_groups
+    where auto_id = #{autoId,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.Group"
+            useGeneratedKeys="true">
+    insert into wow_groups (uuid, `name`, create_time, 
+      creator_uuid, photourl, group_status, 
+      member_total, admin_total)
+    values (#{uuid,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{creatorUuid,jdbcType=VARCHAR}, #{photourl,jdbcType=VARCHAR}, #{groupStatus,jdbcType=INTEGER}, 
+      #{memberTotal,jdbcType=INTEGER}, #{adminTotal,jdbcType=INTEGER})
+  </insert>
+    <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.Group"
+            useGeneratedKeys="true">
+        insert into wow_groups
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                uuid,
+            </if>
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="creatorUuid != null">
+                creator_uuid,
+            </if>
+            <if test="photourl != null">
+                photourl,
+            </if>
+            <if test="groupStatus != null">
+                group_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                #{uuid,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creatorUuid != null">
+                #{creatorUuid,jdbcType=VARCHAR},
+            </if>
+            <if test="photourl != null">
+                #{photourl,jdbcType=VARCHAR},
+            </if>
+            <if test="groupStatus != null">
+                #{groupStatus,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByUuidSelective" parameterType="com.cinle.wowcheat.Model.Group">
+        update wow_groups
+        <set>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="creatorUuid != null">
+                creator_uuid = #{creatorUuid,jdbcType=VARCHAR},
+            </if>
+            <if test="photourl != null">
+                photourl = #{photourl,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where uuid= #{uuid}
+    </update>
+    <select id="selectByUuid" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from wow_groups
+        where uuid = #{uuid}
+    </select>
+
+    <select id="selectGroupsByUserUuid" resultMap="BaseResultMap">
+        select
+        uuid, `name`, create_time, creator_uuid, photourl, group_status,m.group_remarks, m.join_time, m.inviter_uuid, m.member_status
+        from wow_groups g
+        left join wow_groups_member m on g.uuid = m.group_uuid and m.user_uuid = #{userUuid}
+        where g.uuid in (select group_uuid
+        from wow_groups_member
+        where user_uuid = #{userUuid}
+        )
+    </select>
+
+
+
+    <update id="updateGroupStatusByUuid">
+    update wow_groups
+    set group_status = #{groupStatus}
+    where uuid= #{uuid}
+  </update>
+</mapper>

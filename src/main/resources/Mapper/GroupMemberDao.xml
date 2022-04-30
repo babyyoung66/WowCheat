@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cinle.wowcheat.Dao.GroupMemberDao">
+  <resultMap id="BaseResultMap" type="com.cinle.wowcheat.Model.GroupMember">
+    <id column="auto_id" jdbcType="INTEGER" property="autoId" />
+    <result column="group_uuid" jdbcType="VARCHAR" property="groupUuid" />
+    <result column="user_uuid" jdbcType="VARCHAR" property="userUuid" />
+    <result column="group_remarks" jdbcType="VARCHAR" property="remarks"/>
+    <result column="join_time" jdbcType="TIMESTAMP" property="joinTime" />
+    <result column="inviter_uuid" jdbcType="VARCHAR" property="inviterUuid" />
+    <result column="member_role" jdbcType="INTEGER" property="memberRole" />
+    <result column="member_status" jdbcType="INTEGER" property="memberStatus" />
+    <result column="last_cheat_time" jdbcType="TIMESTAMP" property="lastCheatTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    auto_id, group_uuid, user_uuid, group_remarks, join_time, inviter_uuid, member_role, member_status,
+    last_cheat_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from wow_groups_member
+    where auto_id = #{autoId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from wow_groups_member
+    where auto_id = #{autoId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.GroupMember" useGeneratedKeys="true">
+    insert into wow_groups_member (group_uuid, user_uuid, group_remarks, join_time,
+      inviter_uuid, member_role, member_status, 
+      last_cheat_time)
+    values (#{groupUuid,jdbcType=VARCHAR}, #{userUuid,jdbcType=VARCHAR}, #{remarks}, #{joinTime,jdbcType=TIMESTAMP},
+      #{inviterUuid,jdbcType=VARCHAR}, #{memberRole,jdbcType=INTEGER}, #{memberStatus,jdbcType=INTEGER}, 
+      #{lastCheatTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.GroupMember" useGeneratedKeys="true">
+    insert into wow_groups_member
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="groupUuid != null">
+        group_uuid,
+      </if>
+      <if test="userUuid != null">
+        user_uuid,
+      </if>
+      <if test="remarks != null">
+        group_remarks,
+      </if>
+      <if test="joinTime != null">
+        join_time,
+      </if>
+      <if test="inviterUuid != null">
+        inviter_uuid,
+      </if>
+      <if test="memberRole != null">
+        member_role,
+      </if>
+      <if test="memberStatus != null">
+        member_status,
+      </if>
+      <if test="lastCheatTime != null">
+        last_cheat_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="groupUuid != null">
+        #{groupUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="userUuid != null">
+        #{userUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null">
+        #{remarks},
+      </if>
+      <if test="joinTime != null">
+        #{joinTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inviterUuid != null">
+        #{inviterUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="memberRole != null">
+        #{memberRole,jdbcType=INTEGER},
+      </if>
+      <if test="memberStatus != null">
+        #{memberStatus,jdbcType=INTEGER},
+      </if>
+      <if test="lastCheatTime != null">
+        #{lastCheatTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.cinle.wowcheat.Model.GroupMember">
+    update wow_groups_member
+    <set>
+      <if test="groupUuid != null">
+        group_uuid = #{groupUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="userUuid != null">
+        user_uuid = #{userUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null">
+        group_remarks = #{remarks},
+      </if>
+      <if test="joinTime != null">
+        join_time = #{joinTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inviterUuid != null">
+        inviter_uuid = #{inviterUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="memberRole != null">
+        member_role = #{memberRole,jdbcType=INTEGER},
+      </if>
+      <if test="memberStatus != null">
+        member_status = #{memberStatus,jdbcType=INTEGER},
+      </if>
+      <if test="lastCheatTime != null">
+        last_cheat_time = #{lastCheatTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where auto_id = #{autoId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.cinle.wowcheat.Model.GroupMember">
+    update wow_groups_member
+    set group_uuid = #{groupUuid,jdbcType=VARCHAR},
+      user_uuid = #{userUuid,jdbcType=VARCHAR},
+      group_remarks = #{remarks},
+      join_time = #{joinTime,jdbcType=TIMESTAMP},
+      inviter_uuid = #{inviterUuid,jdbcType=VARCHAR},
+      member_role = #{memberRole,jdbcType=INTEGER},
+      member_status = #{memberStatus,jdbcType=INTEGER},
+      last_cheat_time = #{lastCheatTime,jdbcType=TIMESTAMP}
+    where auto_id = #{autoId,jdbcType=INTEGER}
+  </update>
+
+  <select id="getMemberIdListByGroupId" resultType="java.lang.String">
+    select user_uuid
+    from wow_groups_member
+    where group_uuid = #{groupId}
+  </select>
+
+  <select id="getAdminIdListByGroupId" resultType="java.lang.String">
+    select user_uuid
+    from wow_groups_member
+    where group_uuid = #{groupId}  and member_role = 1
+  </select>
+
+  <select id="selectByGroupIdAndMemberId" resultMap="BaseResultMap">
+    select group_remarks, join_time, inviter_uuid,member_status
+    from wow_groups_member
+    where group_uuid = #{groupId} and user_uuid = #{memberId}
+  </select>
+
+  <select id="getGroupMembers" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"></include>
+    from wow_groups_member
+    where group_uuid = #{groupId}
+  </select>
+
+  <select id="getGroupMembersForSendMessage" resultMap="BaseResultMap">
+    select user_uuid,member_role, member_status
+    from wow_groups_member
+    where group_uuid = #{groupId}
+  </select>
+  <select useCache="false" id="getMemberTotalByGroupId" resultType="java.lang.Integer">
+    select count(user_uuid)
+    from wow_groups_member
+    where group_uuid = #{groupId}
+  </select>
+
+  <select useCache="false" id="getAdminTotalByGroupId" resultType="java.lang.Integer">
+    select count(user_uuid)
+    from wow_groups_member
+    where group_uuid = #{groupId} and member_role = 1
+  </select>
+
+
+  <update id="updateLastCheatTime">
+    update wow_groups_member
+    set last_cheat_time = #{time}
+    where group_uuid = #{groupId} and user_uuid = #{userId}
+  </update>
+
+  <update id="exitGroup" >
+    delete from wow_groups_member
+    where group_uuid = #{groupId} and user_uuid = #{userId}
+  </update>
+
+  <select id="getGroupMemberIdsByGroupIdList" resultType="java.lang.String">
+    select distinct user_uuid
+    from wow_groups_member
+    where group_uuid in
+    <foreach collection="groupIds" item="groupId" index="index" open="(" close=")" separator=",">
+        #{groupId}
+    </foreach>
+  </select>
+  <select id="selectGroupIdListByUserUuid" resultType="java.lang.String">
+    select group_uuid
+    from wow_groups_member
+    where user_uuid = #{userUuid}
+   </select>
+
+</mapper>
