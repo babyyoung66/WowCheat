@@ -117,7 +117,7 @@ public class FriendsController {
             //设置对方好友为正常状态
             friendsServices.updateStatusByUuid(request.getReceiverUuid(), shelf, 1);
 
-            request.setRequestStatus(1);
+          /*
             //friendRequestServices.insertSelective(request);
             //发送socket事件更新前端请求列表
             SocketMessage message = new SocketMessage();
@@ -125,7 +125,7 @@ public class FriendsController {
             message.setType(SocketMessageType.friendRequest);
             message.setMessage(request);
             SendSocketMessageEvent reqEvent = new SendSocketMessageEvent(message);
-            applicationContext.publishEvent(reqEvent);
+            applicationContext.publishEvent(reqEvent);*/
             //更新前端好友列表
             SocketMessage message1 = new SocketMessage();
             message1.success();
@@ -192,6 +192,13 @@ public class FriendsController {
                 socketMessage.setMessage(request);
                 SendSocketMessageEvent event = new SendSocketMessageEvent(socketMessage);
                 applicationContext.publishEvent(event);
+                //同时更新请求列表
+                SocketMessage socketMessage1 = new SocketMessage();
+                socketMessage1.success();
+                socketMessage1.setType(SocketMessageType.friendRequest);
+                socketMessage1.setMessage(request);
+                SendSocketMessageEvent event1 = new SendSocketMessageEvent(socketMessage1);
+                applicationContext.publishEvent(event1);
 
             }
             return response.success();
@@ -229,7 +236,7 @@ public class FriendsController {
 
     /**
      * @param friends
-     * @return 返回新列表
+     * @return 前端自行删除本地数据
      * 删除好友（单向）
      */
     @PostMapping("/delete")
@@ -238,7 +245,7 @@ public class FriendsController {
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         int rs = friendsServices.deleteByUuid(shelf, friends.getfUuid());
         if (rs > 0) {
-            friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+            //friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
             return ajaxResponse.success().setMessage("删除成功！");
         }
         return ajaxResponse.error().setCode(501).setMessage("操作失败！");
