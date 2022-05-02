@@ -10,10 +10,11 @@
     <result column="inviter_uuid" jdbcType="VARCHAR" property="inviterUuid" />
     <result column="member_role" jdbcType="INTEGER" property="memberRole" />
     <result column="member_status" jdbcType="INTEGER" property="memberStatus" />
+    <result column="notify_status" jdbcType="INTEGER" property="notifyStatus" />
     <result column="last_cheat_time" jdbcType="TIMESTAMP" property="lastCheatTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    auto_id, group_uuid, user_uuid, group_remarks, join_time, inviter_uuid, member_role, member_status,
+    auto_id, group_uuid, user_uuid, group_remarks, join_time, inviter_uuid, member_role, member_status,notify_status,
     last_cheat_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -26,14 +27,7 @@
     delete from wow_groups_member
     where auto_id = #{autoId,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.GroupMember" useGeneratedKeys="true">
-    insert into wow_groups_member (group_uuid, user_uuid, group_remarks, join_time,
-      inviter_uuid, member_role, member_status, 
-      last_cheat_time)
-    values (#{groupUuid,jdbcType=VARCHAR}, #{userUuid,jdbcType=VARCHAR}, #{remarks}, #{joinTime,jdbcType=TIMESTAMP},
-      #{inviterUuid,jdbcType=VARCHAR}, #{memberRole,jdbcType=INTEGER}, #{memberStatus,jdbcType=INTEGER}, 
-      #{lastCheatTime,jdbcType=TIMESTAMP})
-  </insert>
+
   <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.GroupMember" useGeneratedKeys="true">
     insert into wow_groups_member
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -57,6 +51,9 @@
       </if>
       <if test="memberStatus != null">
         member_status,
+      </if>
+      <if test="notifyStatus != null">
+        notify_status,
       </if>
       <if test="lastCheatTime != null">
         last_cheat_time,
@@ -83,6 +80,9 @@
       </if>
       <if test="memberStatus != null">
         #{memberStatus,jdbcType=INTEGER},
+      </if>
+      <if test="notifyStatus != null">
+        #{notifyStatus},
       </if>
       <if test="lastCheatTime != null">
         #{lastCheatTime,jdbcType=TIMESTAMP},
@@ -113,22 +113,13 @@
       <if test="memberStatus != null">
         member_status = #{memberStatus,jdbcType=INTEGER},
       </if>
+      <if test="notifyStatus != null">
+        notify_status = #{notifyStatus},
+      </if>
       <if test="lastCheatTime != null">
         last_cheat_time = #{lastCheatTime,jdbcType=TIMESTAMP},
       </if>
     </set>
-    where auto_id = #{autoId,jdbcType=INTEGER}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.cinle.wowcheat.Model.GroupMember">
-    update wow_groups_member
-    set group_uuid = #{groupUuid,jdbcType=VARCHAR},
-      user_uuid = #{userUuid,jdbcType=VARCHAR},
-      group_remarks = #{remarks},
-      join_time = #{joinTime,jdbcType=TIMESTAMP},
-      inviter_uuid = #{inviterUuid,jdbcType=VARCHAR},
-      member_role = #{memberRole,jdbcType=INTEGER},
-      member_status = #{memberStatus,jdbcType=INTEGER},
-      last_cheat_time = #{lastCheatTime,jdbcType=TIMESTAMP}
     where auto_id = #{autoId,jdbcType=INTEGER}
   </update>
 
@@ -157,7 +148,7 @@
   </select>
 
   <select id="getGroupMembersForSendMessage" resultMap="BaseResultMap">
-    select user_uuid,member_role, member_status
+    select user_uuid,member_role, member_status,notify_status
     from wow_groups_member
     where group_uuid = #{groupId}
   </select>
@@ -198,5 +189,44 @@
     from wow_groups_member
     where user_uuid = #{userUuid}
    </select>
+  <update id="updateMemberStatus">
+    update wow_groups_member
+    set member_status = #{status}
+    where group_uuid = #{groupId} and user_uuid = #{userId}
+  </update>
+
+  <update id="updateNotifyStatus">
+    update wow_groups_member
+    set notify_status = #{status}
+    where group_uuid = #{groupId} and user_uuid = #{userId}
+  </update>
+
+  <update id="updateByUerIdAndGroupIdSelective" parameterType="com.cinle.wowcheat.Model.GroupMember">
+    update wow_groups_member
+    <set>
+      <if test="remarks != null">
+        group_remarks = #{remarks},
+      </if>
+      <if test="joinTime != null">
+        join_time = #{joinTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inviterUuid != null">
+        inviter_uuid = #{inviterUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="memberRole != null">
+        member_role = #{memberRole,jdbcType=INTEGER},
+      </if>
+      <if test="memberStatus != null">
+        member_status = #{memberStatus,jdbcType=INTEGER},
+      </if>
+      <if test="notifyStatus != null">
+        notify_status = #{notifyStatus},
+      </if>
+      <if test="lastCheatTime != null">
+        last_cheat_time = #{lastCheatTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where group_uuid = #{groupUuid,jdbcType=VARCHAR} and user_uuid = #{userUuid,jdbcType=VARCHAR}
+  </update>
 
 </mapper>
