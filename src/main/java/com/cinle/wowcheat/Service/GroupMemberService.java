@@ -3,7 +3,6 @@ package com.cinle.wowcheat.Service;
 import com.cinle.wowcheat.Model.GroupMember;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,7 +12,6 @@ import java.util.List;
 public interface GroupMemberService {
     int deleteByPrimaryKey(Integer autoId);
 
-    int insert(GroupMember record);
 
     int insertSelective(GroupMember record);
 
@@ -23,7 +21,6 @@ public interface GroupMemberService {
 
     int updateByPrimaryKeySelective(GroupMember record);
 
-    int updateByPrimaryKey(GroupMember record);
 
     List<String> getMemberIdListByGroupId(String groupId);
 
@@ -50,4 +47,10 @@ public interface GroupMemberService {
      * 获取用户所有群组的uuid
      */
     List<String> selectGroupIdListByUserUuid(String userUuid);
+
+    int updateMemberStatus( String userId, String groupId, int status);
+
+    int updateNotifyStatus( String userId, String groupId,  int status);
+
+    int updateByUerIdAndGroupIdSelective(GroupMember record);
 }
