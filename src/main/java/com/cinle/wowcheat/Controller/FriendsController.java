@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.AOP.TestUserForbidden;
 import com.cinle.wowcheat.Enum.CheatStatus;
 import com.cinle.wowcheat.Event.SendSocketMessageEvent;
 import com.cinle.wowcheat.Model.Friends;
@@ -239,13 +240,14 @@ public class FriendsController {
      * @return 前端自行删除本地数据
      * 删除好友（单向）
      */
+    @TestUserForbidden
     @PostMapping("/delete")
     public AjaxResponse deleteFriend(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         int rs = friendsServices.deleteByUuid(shelf, friends.getfUuid());
         if (rs > 0) {
-            //friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+            friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
             return ajaxResponse.success().setMessage("删除成功！");
         }
         return ajaxResponse.error().setCode(501).setMessage("操作失败！");
@@ -258,6 +260,7 @@ public class FriendsController {
      * @param friends
      * @return
      */
+    @TestUserForbidden
     @PostMapping("/changeStatus")
     public AjaxResponse changeStatus(@RequestBody @Valid Friends friends) {
         AjaxResponse ajaxResponse = new AjaxResponse();
