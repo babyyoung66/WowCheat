@@ -149,9 +149,10 @@ public class MessageServices {
      * @param collectionName
      * @return 返回未读的群聊记录
      */
-    public long getGroupUnReadTotal(String groupId, Timestamp time, String collectionName) {
+    public long getGroupUnReadTotal(String shelfId ,String groupId, Timestamp time, String collectionName) {
         Query query = new Query(
                 Criteria.where("to").is(groupId)
+                        .and("from").ne(shelfId)
                         .and("time").gte(getQueryStartTime()).gte(time)
         );
         return mongoTemplate.count(query, collectionName);
