@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Service.Impl;
 
 import com.cinle.wowcheat.Dao.RoleDao;
+import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Model.Role;
 import com.cinle.wowcheat.Service.RoleServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,10 @@ public class RoleServicesImpl implements RoleServices {
     @Override
     public List<Role> selectByUseruid(String uuid) {
         return roleDao.selectByUseruid(uuid);
+    }
+
+    @Override
+    public List<String> selectUserIdsByRoleType(RoleEnum roleType) {
+        return roleDao.selectUserIdsByRoleType(roleType);
     }
 }
