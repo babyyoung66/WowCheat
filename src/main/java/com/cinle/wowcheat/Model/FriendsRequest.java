@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.Length;
@@ -44,6 +45,7 @@ public class FriendsRequest implements Serializable {
     /**
      * 请求时间
      */
+    @JSONField(format="yyyy-MM-dd HH:mm:ss" )
     private Date requestTime;
 
     /**
