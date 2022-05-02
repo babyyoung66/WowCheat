@@ -1,6 +1,7 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.AOP.TestUserForbidden;
 import com.cinle.wowcheat.Constants.MessageConst;
 import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Model.Group;
@@ -11,10 +12,13 @@ import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +29,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/group")
+@Validated
 public class GroupController {
     @Autowired
     GroupServices groupServices;
@@ -45,12 +50,13 @@ public class GroupController {
             if (cheatTime != null){
                 time = new Timestamp(cheatTime.getTime());
             }
-            long total = messageServices.getGroupUnReadTotal(g.getUuid(),time,"group");
+            long total = messageServices.getGroupUnReadTotal(uuid,g.getUuid(),time,"group");
             groups.get(i).getConcatInfo().setUnReadTotal(total);
         }
         response.success().setData(JSON.toJSON(groups));
         return response;
     }
+
     @PostMapping("/UpdateConcatTime")
     public AjaxResponse upDateLastCheatTime(String uuid) {
         AjaxResponse response = new AjaxResponse();
@@ -61,4 +67,34 @@ public class GroupController {
         }
         return response.success().setMessage("更改成功！");
     }
+
+    /**
+     * 退出群聊,x-www-form请求
+     * @param groupId
+     * @return
+     */
+    @TestUserForbidden
+    @PostMapping("/exitGroup")
+    public AjaxResponse exitGroup(String groupId){
+        AjaxResponse response = new AjaxResponse();
+        String userId = SecurityContextUtils.getCurrentUserUUID();
+        int res = groupMemberService.exitGroup(userId,groupId);
+        if (res > 0){
+           return response.success().setMessage("已退出该群聊！");
+        }
+        return response.error().setCode(501).setMessage("未能成功退出该群聊，请重新尝试！");
+    }
+
+    @PostMapping("/changeNotifyStatus")
+    public AjaxResponse changeNotifyStatus(@Valid @RequestBody GroupMember member){
+        AjaxResponse response = new AjaxResponse();
+        String userId = SecurityContextUtils.getCurrentUserUUID();
+        int res = groupMemberService.updateNotifyStatus(userId,member.getGroupUuid(),member.getNotifyStatus());
+        if (res > 0){
+            return response.success().setMessage("修改成功");
+        }
+        return response.error().setCode(501).setMessage("修改失败，请重新尝试！");
+    }
+
+
 }
