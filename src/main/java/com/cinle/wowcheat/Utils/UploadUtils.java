@@ -99,7 +99,7 @@ public class UploadUtils {
      * @throws UploadFileException
      */
     public static String uploadFile(MultipartFile file, String filePath, FileType type) throws UploadFileException {
-        if (file == null){
+        if (file == null || file.getSize() == 0){
             throw new UploadFileException("请选择文件！");
         }
         String realPath = FileConst.LOCAL_PATH + filePath;
@@ -109,6 +109,9 @@ public class UploadUtils {
             throw new UploadFileException(getLimitString(type) + "!");
         }
         try {
+            if (path.toFile().exists()){
+                Files.delete(path);
+            }
             //父目录不存在则创建父目录
             if(!path.toFile().getParentFile().exists()){
                 path.toFile().getParentFile().mkdirs();
@@ -126,7 +129,7 @@ public class UploadUtils {
         }
     }
 
-    public static void removeFile(String fileUrl) throws FileUploadException {
+    public static void removeFile(String fileUrl) {
         if (!StringUtils.hasText(fileUrl)) {
             return;
         }
