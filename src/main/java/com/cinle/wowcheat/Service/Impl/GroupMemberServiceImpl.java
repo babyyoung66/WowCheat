@@ -29,18 +29,12 @@ public class GroupMemberServiceImpl implements GroupMemberService {
         return memberDao.deleteByPrimaryKey(autoId);
     }
 
-    @Override
-    public int insert(GroupMember record) {
-        record.setJoinTime(new Date());
-        //更新redis
-        groupMemberCache.updateGroupMemberIds(record.getGroupUuid(), Arrays.asList(record.getUserUuid()));
-
-        return memberDao.insert(record);
-    }
 
     @Override
     public int insertSelective(GroupMember record) {
         record.setJoinTime(new Date());
+        //更新redis
+        groupMemberCache.updateGroupMemberIds(record.getGroupUuid(), Arrays.asList(record.getUserUuid()));
         return memberDao.insertSelective(record);
     }
 
@@ -59,10 +53,6 @@ public class GroupMemberServiceImpl implements GroupMemberService {
         return memberDao.updateByPrimaryKeySelective(record);
     }
 
-    @Override
-    public int updateByPrimaryKey(GroupMember record) {
-        return updateByPrimaryKey(record);
-    }
 
     @Override
     public List<String> getMemberIdListByGroupId(String groupId) {
@@ -108,7 +98,7 @@ public class GroupMemberServiceImpl implements GroupMemberService {
 
     @Override
     public List<String> getGroupMemberIdsByGroupIdList(List<String> groupIds) {
-        if (groupIds == null || groupIds.size() == 0){
+        if (groupIds == null || groupIds.size() == 0) {
             return new ArrayList<>();
         }
         return memberDao.getGroupMemberIdsByGroupIdList(groupIds);
@@ -117,5 +107,27 @@ public class GroupMemberServiceImpl implements GroupMemberService {
     @Override
     public List<String> selectGroupIdListByUserUuid(String userUuid) {
         return memberDao.selectGroupIdListByUserUuid(userUuid);
+    }
+
+    @Override
+    public int updateMemberStatus(String userId, String groupId, int status) {
+        return memberDao.updateMemberStatus(userId, groupId, status);
+    }
+
+    @Override
+    public int updateNotifyStatus(String userId, String groupId, int status) {
+        //更新redis
+        if (status == 0){
+            groupMemberCache.updateGroupMemberIds(groupId,Arrays.asList(userId));
+        }
+        if (1 == status){
+            groupMemberCache.deleteGroupMemberId(groupId,Arrays.asList(userId));
+        }
+        return memberDao.updateNotifyStatus(userId, groupId, status);
+    }
+
+    @Override
+    public int updateByUerIdAndGroupIdSelective(GroupMember record) {
+        return memberDao.updateByUerIdAndGroupIdSelective(record);
     }
 }
