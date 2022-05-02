@@ -1,15 +1,19 @@
 package com.cinle.wowcheat.Controller;
 
 import com.alibaba.fastjson.JSON;
+import com.cinle.wowcheat.AOP.TestUserForbidden;
 import com.cinle.wowcheat.Constants.FileConst;
+import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Dao.UserFileDetailDao;
 import com.cinle.wowcheat.Enum.FileType;
+import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Event.ImagePressEvent;
 import com.cinle.wowcheat.Event.UserChangeEvent;
 import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Model.UserFileDetail;
 import com.cinle.wowcheat.Service.FriendsServices;
+import com.cinle.wowcheat.Service.RoleServices;
 import com.cinle.wowcheat.Service.UserServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Utils.UploadUtils;
@@ -32,6 +36,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -54,7 +59,19 @@ public class UserController {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private UserFileDetailDao fileDetailDao;
+    RoleServices roleServices;
+
+
+    @PostMapping("/getTestUser")
+    public AjaxResponse getTestUser() {
+        AjaxResponse ajaxResponse = new AjaxResponse();
+        List<String> Ids = roleServices.selectUserIdsByRoleType(RoleEnum.TEST);
+        List<MyUserDetail> users = userServices.selectUsersByUUIDs(Ids);
+        if (users != null) {
+            return ajaxResponse.success().setData(JSON.toJSON(users));
+        }
+        return ajaxResponse.error().setMessage("未查询到可用的测试账号，请自行注册！");
+    }
 
     /**
      * 根据wowId查找用户
@@ -102,6 +119,7 @@ public class UserController {
      *
      * @return
      */
+    @TestUserForbidden
     @PostMapping("/editPassword")
     public AjaxResponse EditPassword(@NotBlank(message = "密码不能空!")
                                      @Pattern(regexp = "[a-zA-Z0-9.!@#$%^&_;~,?]*?", message = "密码不能包含中文字符,且只能包含以下特殊字符: .!@#$%^&_;~,?")
@@ -121,7 +139,7 @@ public class UserController {
         MyUserDetail newUsr = new MyUserDetail();
         newUsr.setUuid(uuid);
         newUsr.setPassword(password);
-        int rs = userServices.updateByUUIDSelective(newUsr);
+        int rs = userServices.updatePassWordByUUID(newUsr);
         if (rs > 0) {
             response.success().setMessage("修改成功，请重新登录！");
             ApplicationEvent event = new UserChangeEvent(newUsr);
@@ -173,13 +191,16 @@ public class UserController {
             return response.error().setCode(501).setMessage("不允许上传该类型文件!");
         }
         MyUserDetail usr = userServices.selectByUUID(uuid);
+        String photoUrl= usr.getPhotourl();
+        String suffixName = ".jpg";
+        String photoName = UUID.randomUUID().toString() + suffixName;
+        if (!photoUrl.contains(FileConst.DEFAULT_PHOTO_URL)){
+            photoName= photoUrl.substring(photoUrl.lastIndexOf("/") + 1);
+        }
 
         //上传新头像
         String fileName = file.getOriginalFilename();
-        //所有图片统一转成jpg格式，然后进行压缩
-        String suffixName = ".jpg";
-        String uuName = UUID.randomUUID().toString();
-        String uploadPath = FileConst.PHOTO_PATH + uuName + suffixName;
+        String uploadPath = FileConst.PHOTO_PATH + photoName ;
         String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
         //真实保存地址
         String realPath = UploadUtils.uploadFile(file, uploadPath, FileType.image);
@@ -200,9 +221,6 @@ public class UserController {
         ApplicationEvent event = new ImagePressEvent(fileDetail);
         applicationContext.publishEvent(event);
 
-        //将旧头像删除
-        UploadUtils.removeFile(usr.getPhotourl());
-        usr.setPhotourl(fileUrl);
         response.success().setMessage("修改成功！").setData(JSON.toJSON(usr));//返回更新后的数据
         return response;
     }
