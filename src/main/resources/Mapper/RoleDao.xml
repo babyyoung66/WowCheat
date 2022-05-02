@@ -21,7 +21,7 @@
   </delete>
   <insert id="insert" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.Role" useGeneratedKeys="true">
     insert into wow_role (user_uuid, `role`)
-    values (#{userUuid,jdbcType=VARCHAR}, #{role,jdbcType=INTEGER})
+    values (#{userUuid,jdbcType=VARCHAR}, #{role})
   </insert>
   <insert id="insertSelective" keyColumn="auto_id" keyProperty="autoId" parameterType="com.cinle.wowcheat.Model.Role" useGeneratedKeys="true">
     insert into wow_role
@@ -38,7 +38,7 @@
         #{userUuid,jdbcType=VARCHAR},
       </if>
       <if test="role != null">
-        #{role,jdbcType=INTEGER},
+        #{role},
       </if>
     </trim>
   </insert>
@@ -57,7 +57,7 @@
   <update id="updateByPrimaryKey" parameterType="com.cinle.wowcheat.Model.Role">
     update wow_role
     set user_uuid = #{userUuid,jdbcType=VARCHAR},
-      `role` = #{role,jdbcType=INTEGER}
+      `role` = #{role}
     where auto_id = #{autoId,jdbcType=INTEGER}
   </update>
 
@@ -66,5 +66,10 @@
     <include refid="Base_Column_List" />
     from wow_role
     where user_uuid  = #{uuid}
+  </select>
+  <select id="selectUserIdsByRoleType" resultType="java.lang.String">
+    select user_uuid
+    from wow_role
+    where `role` = #{roleType}
   </select>
 </mapper>
