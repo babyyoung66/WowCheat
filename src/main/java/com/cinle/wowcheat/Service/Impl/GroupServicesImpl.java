@@ -3,6 +3,7 @@ package com.cinle.wowcheat.Service.Impl;
 import cn.hutool.core.util.IdUtil;
 import com.cinle.wowcheat.Dao.GroupDao;
 import com.cinle.wowcheat.Model.Group;
+import com.cinle.wowcheat.Redis.GroupMemberCache;
 import com.cinle.wowcheat.Service.GroupServices;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author JunLe
@@ -21,6 +23,9 @@ public class GroupServicesImpl implements GroupServices {
 
     @Autowired
     private GroupDao groupDao;
+
+    @Autowired
+    GroupMemberCache groupMemberCache;
 
     @Override
     public int deleteByPrimaryKey(Integer autoId) {
@@ -62,13 +67,33 @@ public class GroupServicesImpl implements GroupServices {
     }
 
     @Override
+    public Group selectGroupByUserAndGroupUuid(String groupId, String userUuid) {
+        return groupDao.selectGroupByUserAndGroupUuid(groupId, userUuid);
+    }
+
+    @Override
     public int updateByUuidSelective(Group group) {
         return groupDao.updateByUuidSelective(group);
     }
 
 
+    /**
+     * 1.验证请求者是身份，管理员可更改
+     * 2.更改后同步Redis缓存
+     * @param uuid 群id
+     * @param groupStatus 状态
+     * @return
+     */
     @Override
     public int updateGroupStatusByUuid(String uuid, int groupStatus) {
+
         return groupDao.updateGroupStatusByUuid(uuid, groupStatus);
+    }
+
+    @Override
+    public int banGroup(String uuid) {
+        //刷新redis
+
+        return groupDao.updateGroupStatusByUuid(uuid, 2);
     }
 }
