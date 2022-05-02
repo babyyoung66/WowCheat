@@ -175,7 +175,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         String name = file.getOriginalFilename();
         String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
         //如果是图片，则统一改为jpg，后续开启一个线程去压缩已上传的图片
-        if(FileType.image.equals(message.getFileDetail().getFileType())){
+        if(FileType.image.equals(message.getFileDetail().getFileType()) && !suffixName.equalsIgnoreCase(".gif")){
             suffixName = ".jpg";
         }
         String uuName = UUID.randomUUID().toString();
@@ -194,10 +194,11 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         userFileDetail.setFileType(message.getFileDetail().getFileType().toString());
         userFileDetail.setUploadTime(new Date());
         fileDetailDao.insertSelective(userFileDetail);
-        //发送图片压缩事件,
-        ApplicationEvent event = new ImagePressEvent(userFileDetail);
-        applicationContext.publishEvent(event);
-
+        //非GIF图，发送图片压缩事件,
+        if (!suffixName.equalsIgnoreCase(".gif")){
+            ApplicationEvent event = new ImagePressEvent(userFileDetail);
+            applicationContext.publishEvent(event);
+        }
 
         return message;
     }
@@ -224,6 +225,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
             Set<String> members = groupMemberCache.getGroupMemberIdsByGroupId(cheatMessage.getTo());
             Iterator<String> it = members.iterator();
             while (it.hasNext()) {
+
                 messagingTemplate.convertAndSendToUser(it.next(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
             }
         }
