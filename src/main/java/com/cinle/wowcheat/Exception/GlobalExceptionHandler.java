@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     public AjaxResponse CustomerException(Exception e){
         log.error(e.getMessage());
         AjaxResponse ajaxResponse = new AjaxResponse();
-        return ajaxResponse.error().setMessage("系统内部错误，请联系管理员！" + e.getMessage());
+        return ajaxResponse.error().setMessage(e.getMessage());
     }
 
     /**
