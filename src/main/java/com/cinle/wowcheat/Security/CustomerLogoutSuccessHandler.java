@@ -1,5 +1,7 @@
 package com.cinle.wowcheat.Security;
 
+import com.cinle.wowcheat.Utils.IpUtils;
+import com.cinle.wowcheat.Utils.UploadUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +47,13 @@ public class CustomerLogoutSuccessHandler implements LogoutSuccessHandler {
                 out.write(String.valueOf(ajaxResponse));
                 out.flush();
                 out.close();
-                log.info("用户uuid: {} 已从主机: {}:{} 退出登录......", uuid, request.getRemoteHost(), request.getRemotePort());
+                log.info("用户uuid: {} 已从主机: {}退出登录......", uuid, IpUtils.getRealIp(request));
             }else {
                 throw new  NullPointerException("无效退出请求......");
             }
 
         } catch (Exception e) {
-            log.info("来着主机: {}:{} 的无效退出请求......", request.getRemoteHost(), request.getRemotePort());
+            log.info("来着主机: {} 的无效退出请求......", IpUtils.getRealIp(request));
         }
 
     }
