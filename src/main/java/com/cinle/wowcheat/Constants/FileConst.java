@@ -18,8 +18,8 @@ public class FileConst {
      * 外界访问的虚拟url
      * Nginx代理时请填写Nginx域名端口或ip端口
      */
-    public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
-    //public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu:1288" + ACCESS_PATH;
+    //public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
+    public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu:1288" + ACCESS_PATH;
 
     /**
      * 文件上传对应的本地路径
@@ -29,7 +29,7 @@ public class FileConst {
     /**
      * 注册时默认头像路径
      */
-    public static final String DEFAULT_PHOTO_URL = "../static/cheat.png";
+    public static final String DEFAULT_PHOTO_URL = "./static/cheat.png";
 
     public static final String PHOTO_PATH = "image/";
 
