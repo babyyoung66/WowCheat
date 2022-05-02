@@ -25,7 +25,15 @@ public interface GroupServices {
      */
     List<Group> selectGroupsByUserUuid( String userUuid);
 
+    Group selectGroupByUserAndGroupUuid(String groupId,String userUuid);
+
     int updateByUuidSelective(Group group);
 
     int updateGroupStatusByUuid(String uuid, int groupStatus);
+
+    /**
+     * 封禁群聊
+     * 系统管理员可使用
+     */
+    int banGroup(String uuid);
 }
