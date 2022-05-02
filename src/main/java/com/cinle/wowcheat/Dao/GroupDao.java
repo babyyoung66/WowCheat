@@ -28,6 +28,7 @@ public interface GroupDao {
     List<Group> selectGroupsByUserUuid(@Param("userUuid") String userUuid);
 
 
+    Group selectGroupByUserAndGroupUuid(@Param("groupId") String groupId,@Param("userUuid") String userUuid);
 
     int updateByUuidSelective(Group group);
 
