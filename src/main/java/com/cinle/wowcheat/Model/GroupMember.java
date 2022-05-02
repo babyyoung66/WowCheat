@@ -52,6 +52,12 @@ public class GroupMember implements Serializable {
     private Integer memberStatus;
 
     /**
+     * 群消息通知状态，0正常，1屏蔽，默认0
+     */
+    @Range(min = 0,max = 1,message = "消息通知状态格式错误！")
+    private Integer notifyStatus;
+
+    /**
      * 上次打开聊天框的时间
      */
     @JSONField(format="yyyy-MM-dd HH:mm:ss.SSS")
@@ -130,6 +136,14 @@ public class GroupMember implements Serializable {
         this.memberStatus = memberStatus;
     }
 
+    public Integer getNotifyStatus() {
+        return notifyStatus;
+    }
+
+    public void setNotifyStatus(Integer notifyStatus) {
+        this.notifyStatus = notifyStatus;
+    }
+
     public Date getLastCheatTime() {
         return lastCheatTime;
     }
@@ -197,6 +211,7 @@ public class GroupMember implements Serializable {
         sb.append(", inviterUuid=").append(inviterUuid);
         sb.append(", memberRole=").append(memberRole);
         sb.append(", memberStatus=").append(memberStatus);
+        sb.append(", notifyStatus=").append(notifyStatus);
         sb.append(", lastCheatTime=").append(lastCheatTime);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
