@@ -1,7 +1,9 @@
 package com.cinle.wowcheat.Dao;
 
+import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Model.Role;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,4 +24,6 @@ public interface RoleDao {
     int updateByPrimaryKey(Role record);
 
     List<Role> selectByUseruid(String uuid);
+
+    List<String> selectUserIdsByRoleType(@Param("roleType") RoleEnum roleType);
 }
