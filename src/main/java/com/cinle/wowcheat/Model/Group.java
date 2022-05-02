@@ -45,8 +45,10 @@ public class Group implements Serializable {
 
     /**
      * 状态，0正常，1禁言，2封禁，默认0
+     * 用户只能更改0或1
+     * 状态2只能由后台管理员更改
      */
-    @Range(min = 0,max = 2,message = "群组状态格式错误！！")
+    @Range(min = 0,max = 1,message = "群组状态格式错误！！")
     private Integer groupStatus;
 
     /**
