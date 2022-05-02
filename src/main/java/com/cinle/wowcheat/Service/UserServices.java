@@ -16,6 +16,7 @@ public interface UserServices {
 
     int updateByUUIDSelective(MyUserDetail record);
 
+    int updatePassWordByUUID(MyUserDetail record);
 
     CustomerUserDetails findForLogin(String wowId);
 
