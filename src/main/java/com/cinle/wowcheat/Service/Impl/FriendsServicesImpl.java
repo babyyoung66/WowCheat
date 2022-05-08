@@ -6,6 +6,7 @@ import com.cinle.wowcheat.Model.Friends;
 import com.cinle.wowcheat.Service.FriendsServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -55,16 +56,24 @@ public class FriendsServicesImpl implements FriendsServices {
     }
 
     @Override
+    public List<Friends> selectShelfInfoByFriendIdList(String sUuid, List<String> IdList) {
+        return friendsDao.selectShelfInfoByFriendIdList(sUuid, IdList);
+    }
+
+    @Override
     public Friends findFriend(String sUuid, String fUuid) {
         return friendsDao.findFriend(sUuid, fUuid);
     }
 
     @Override
     public Friends findFriendNonCache(String sUuid, String fUuid) {
-        return friendsDao.findFriend(sUuid, fUuid);
+        return friendsDao.findFriendNonCache(sUuid, fUuid);
     }
     @Override
     public int updateRemarksByUuid(Friends friends) {
+        if (friends.getRemarks() == null || friends.getRemarks().trim().equals("")){
+            friends.setRemarks("");
+      }
         return friendsDao.updateRemarksByUuid(friends);
     }
 
