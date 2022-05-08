@@ -1,5 +1,6 @@
 package com.cinle.wowcheat.Service;
 
+import com.cinle.wowcheat.Exception.CustomerException;
 import com.cinle.wowcheat.Model.GroupMember;
 import org.apache.ibatis.annotations.Param;
 
@@ -30,6 +31,8 @@ public interface GroupMemberService {
 
     List<GroupMember> getGroupMembersForSendMessage(String groupId);
 
+    GroupMember getGroupMemberForSendMessage(String groupId, String memberId);
+
     int getMemberTotalByGroupId(String groupId);
 
     int getAdminTotalByGroupId(String groupId);
@@ -53,4 +56,6 @@ public interface GroupMemberService {
     int updateNotifyStatus( String userId, String groupId,  int status);
 
     int updateByUerIdAndGroupIdSelective(GroupMember record);
+
+    int insertManySelective(List<GroupMember> members,String groupId) throws CustomerException;
 }
