@@ -2,7 +2,6 @@ package com.cinle.wowcheat.Redis;
 
 import com.cinle.wowcheat.Dao.GroupMemberDao;
 import com.cinle.wowcheat.Model.GroupMember;
-import com.cinle.wowcheat.Service.GroupMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -28,10 +27,10 @@ public class GroupMemberCache {
     private GroupMemberDao groupMemberDao;
 
 
-    public Set<String> getGroupMemberIdsByGroupId(String groupId) {
+    public Set<GroupMember> getGroupMembersByGroupId(String groupId) {
         String key = prefix_KEY_MEMBER + groupId;
-        Set<String> set = redisTemplate.opsForSet().members(key);
-        return set.size() > 0 ? set : initMemberIds(groupId);
+        Set<GroupMember> set = redisTemplate.opsForSet().members(key);
+        return set.size() > 0 ? set : initMembers(groupId);
     }
 
     public Set<String> getGroupAdminIdsByGroupId(String groupId) {
@@ -40,22 +39,22 @@ public class GroupMemberCache {
         return set.size() > 0 ? set : initAdminIds(groupId);
     }
 
-    public long updateGroupMemberIds(String groupId, List<String> groupMemberIds) {
+    public long updateGroupMembers(String groupId, List<GroupMember> groupMembers) {
         String key = prefix_KEY_MEMBER + groupId;
         long count = 0;
-        for (String memberId : groupMemberIds) {
-            redisTemplate.opsForSet().add(key, memberId);
+        for (GroupMember member : groupMembers) {
+            redisTemplate.opsForSet().add(key, member);
             count++;
         }
         redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
         return count;
     }
 
-    public long deleteGroupMemberId(String groupId, List<String> memberIds) {
+    public long deleteGroupMember(String groupId, List<GroupMember> groupMembers) {
         String key = prefix_KEY_MEMBER + groupId;
         long count = 0;
-        for (String uuid : memberIds) {
-            redisTemplate.opsForSet().remove(key, uuid);
+        for (GroupMember member : groupMembers) {
+            redisTemplate.opsForSet().remove(key, member);
             count++;
         }
         redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
@@ -84,23 +83,28 @@ public class GroupMemberCache {
         return count;
     }
 
-    private Set<String> initMemberIds(String groupId) {
+    public void removeAllCache(String groupId){
+        redisTemplate.delete(prefix_KEY_MEMBER + groupId);
+        redisTemplate.delete(prefix_KEY_ADMIN + groupId);
+    }
+
+    private Set<GroupMember> initMembers(String groupId) {
         String key = prefix_KEY_MEMBER + groupId;
-        Set<String> set = redisTemplate.opsForSet().members(key);
+        Set<GroupMember> set = redisTemplate.opsForSet().members(key);
         if (set != null && set.size() > 0) {
             return set;
         } else {
             synchronized (key) {
-                Set<String> set1 = redisTemplate.opsForSet().members(key);
+                Set<GroupMember> set1 = redisTemplate.opsForSet().members(key);
                 if (set != null && set.size() > 0) {
                     return set1;
                 }
-                List<String> members = groupMemberDao.getMemberIdListByGroupId(groupId);
+                List<GroupMember> members = groupMemberDao.getGroupMembersForSendMessage(groupId);
                 if (members == null || members.size() <= 0) {
                     //群组不存在或者无组员，随便存一个，防止非法请求
-                    members = Arrays.asList("default");
+                    members = Arrays.asList(new GroupMember());
                 }
-                updateGroupMemberIds(groupId, members);
+                updateGroupMembers(groupId, members);
             }
         }
         return redisTemplate.opsForSet().members(key);
@@ -127,4 +131,6 @@ public class GroupMemberCache {
         }
         return redisTemplate.opsForSet().members(key);
     }
+
+
 }
