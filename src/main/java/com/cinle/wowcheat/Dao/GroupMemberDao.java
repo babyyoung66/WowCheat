@@ -31,9 +31,11 @@ public interface GroupMemberDao {
 
     /**
      * @param groupId
-     * @return 只查询 user_uuid,member_role, member_status 三个字段
+     * @return 只查询 user_uuid,member_role, member_status ,notify_status
      */
     List<GroupMember> getGroupMembersForSendMessage(@Param("groupId") String groupId);
+
+    GroupMember getGroupMemberForSendMessage(@Param("groupId") String groupId, @Param("memberId") String memberId);
 
     int getMemberTotalByGroupId(@Param("groupId") String groupId);
 
@@ -58,4 +60,10 @@ public interface GroupMemberDao {
     int updateNotifyStatus(@Param("userId") String userId, @Param("groupId") String groupId, @Param("status") int status);
 
     int updateByUerIdAndGroupIdSelective(GroupMember record);
+
+    /**
+     * 批量插入
+     * 只包含初始的四个字段：group_uuid, user_uuid, join_time, inviter_uuid
+     */
+    int insertManySelective(@Param("members") List<GroupMember> members);
 }
