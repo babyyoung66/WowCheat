@@ -247,7 +247,11 @@ public class FriendsController {
         String shelf = SecurityContextUtils.getCurrentUserUUID();
         int rs = friendsServices.deleteByUuid(shelf, friends.getfUuid());
         if (rs > 0) {
-            friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+            //更改对方状态，对方为拉黑状态时不修改
+            Friends target = friendsServices.findFriendNonCache(friends.getfUuid(),shelf);
+            if (target != null && target.getStatus() != CheatStatus.Friend_Block.getIndex()){
+                friendsServices.updateStatusByUuid(friends.getfUuid(), shelf, CheatStatus.Friend_NotFriend.getIndex());
+            }
             return ajaxResponse.success().setMessage("删除成功！");
         }
         return ajaxResponse.error().setCode(501).setMessage("操作失败！");
