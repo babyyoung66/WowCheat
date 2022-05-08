@@ -175,15 +175,11 @@
     <select id="selectByWowIdOrEmail" resultType="com.cinle.wowcheat.Model.MyUserDetail">
         select uuid,wow_id,`name`,`status`,email, sex,address,birthday
         from wow_userdetail
-        <where>
-            <if test="wowId != null">
-                wow_id = #{wowId}
-            </if>
-            <if test="email != null">
-                or email = #{email}
-            </if>
-
-        </where>
+        where wow_id = #{wowId}
+        union all
+        select uuid,wow_id,`name`,`status`,email, sex,address,birthday
+        from wow_userdetail
+        where email = #{email}
 
     </select>
     <select id="selectByWowId" resultType="com.cinle.wowcheat.Model.MyUserDetail">
