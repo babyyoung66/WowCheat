@@ -10,10 +10,7 @@ import com.cinle.wowcheat.Enum.MessageType;
 import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Event.ImagePressEvent;
 import com.cinle.wowcheat.Exception.UploadFileException;
-import com.cinle.wowcheat.Model.CheatMessage;
-import com.cinle.wowcheat.Model.Friends;
-import com.cinle.wowcheat.Model.MyUserDetail;
-import com.cinle.wowcheat.Model.UserFileDetail;
+import com.cinle.wowcheat.Model.*;
 import com.cinle.wowcheat.Redis.GroupMemberCache;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.MessageServices;
@@ -54,16 +51,17 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
     @Override
     public void sendText(SocketUserPrincipal principal, CheatMessage cheatMessage) {
         cheatMessage.setTime(new Date());
-        if ("personal".equals(cheatMessage.getMsgType())){
+        if ("personal".equals(cheatMessage.getMsgType())) {
             coverMessage coverMessage = checkFriend(principal.getName(), cheatMessage);
-            sendToUser(principal,coverMessage);
+            sendToUser(principal, coverMessage);
         }
-        if ("group".equals(cheatMessage.getMsgType())){
-            coverMessage coverMessage1 = checkGroup(principal.getName(),cheatMessage);
-            sendToGroup(principal,coverMessage1);
+        if ("group".equals(cheatMessage.getMsgType())) {
+            coverMessage coverMessage1 = checkGroup(principal.getName(), cheatMessage);
+            sendToGroup(principal, coverMessage1);
         }
 
     }
+
     @Override
     public void sendTopic(SocketUserPrincipal principal, CheatMessage cheatMessage) {
         SocketMessage message = new SocketMessage();
@@ -137,7 +135,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         cheatMessage.setContent("欢迎注册使用WowCheat~~");
         cheatMessage.setMsgType(MessageType.personal.toString());
         message.success().setMessage(cheatMessage);
-        messageServices.saveMessage(cheatMessage,cheatMessage.getMsgType());
+        messageServices.saveMessage(cheatMessage, cheatMessage.getMsgType());
         messagingTemplate.convertAndSendToUser(cheatMessage.getTo(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
     }
 
@@ -162,7 +160,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         if (coverMessage.isSuccess()) {
             CheatMessage cheatMessage = (CheatMessage) coverMessage.getMessage().getMessage();
             cheatMessage.setMsgType("group");
-            sendTextMessage(principal,coverMessage.getMessage());
+            sendTextMessage(principal, coverMessage.getMessage());
         } else {
             //错误时只反馈错误消息给发送者
             messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(coverMessage.getMessage(), true));
@@ -175,7 +173,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         String name = file.getOriginalFilename();
         String suffixName = name.substring(name.lastIndexOf("."));       //获取文件后缀
         //如果是图片，则统一改为jpg，后续开启一个线程去压缩已上传的图片
-        if(FileType.image.equals(message.getFileDetail().getFileType()) && !suffixName.equalsIgnoreCase(".gif")){
+        if (FileType.image.equals(message.getFileDetail().getFileType()) && !suffixName.equalsIgnoreCase(".gif")) {
             suffixName = ".jpg";
         }
         String uuName = UUID.randomUUID().toString();
@@ -195,7 +193,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         userFileDetail.setUploadTime(new Date());
         fileDetailDao.insertSelective(userFileDetail);
         //非GIF图，发送图片压缩事件,
-        if (!suffixName.equalsIgnoreCase(".gif")){
+        if (!suffixName.equalsIgnoreCase(".gif")) {
             ApplicationEvent event = new ImagePressEvent(userFileDetail);
             applicationContext.publishEvent(event);
         }
@@ -217,16 +215,18 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         if (principal.getName().equals(cheatMessage.getTo())) {
             return;
         }
-        if ("personal".equals(cheatMessage.getMsgType())){
+        if ("personal".equals(cheatMessage.getMsgType())) {
             messagingTemplate.convertAndSendToUser(cheatMessage.getTo(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
         }
-        if ("group".equals(cheatMessage.getMsgType())){
+        if ("group".equals(cheatMessage.getMsgType())) {
             //获取数据库群组成员列表，遍历发送
-            Set<String> members = groupMemberCache.getGroupMemberIdsByGroupId(cheatMessage.getTo());
-            Iterator<String> it = members.iterator();
+            Set<GroupMember> members = groupMemberCache.getGroupMembersByGroupId(cheatMessage.getTo());
+            Iterator<GroupMember> it = members.iterator();
             while (it.hasNext()) {
-
-                messagingTemplate.convertAndSendToUser(it.next(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
+                GroupMember member = it.next();
+                if (0 == member.getNotifyStatus()) {
+                    messagingTemplate.convertAndSendToUser(member.getUserUuid(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(message, true));
+                }
             }
         }
 
@@ -236,7 +236,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
     private coverMessage checkFriend(String shelfUuid, CheatMessage cheatMessage) {
         SocketMessage socketMessage = new SocketMessage();
         coverMessage coverMessage = new coverMessage();
-        if (cheatMessage.getContent() !=null && cheatMessage.getContent().trim().length() > SocketConstants.CONTENT_LIMIT) {
+        if (cheatMessage.getContent() != null && cheatMessage.getContent().trim().length() > SocketConstants.CONTENT_LIMIT) {
             socketMessage.error().setErrorMessage("文字超出限制长度！");
             coverMessage.setSuccess(false);
             coverMessage.setMessage(socketMessage);
@@ -257,7 +257,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
             return coverMessage;
         }
         Friends friendsInfo = friendsServices.findFriend(cheatMessage.getTo(), shelfUuid);
-        if (friendsInfo == null){
+        if (friendsInfo == null) {
             socketMessage.error().setCode(404).setErrorMessage("您不是对方的好友！");
             coverMessage.setMessage(socketMessage);
             coverMessage.setSuccess(false);
@@ -306,8 +306,17 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
     private coverMessage checkGroup(String shelfUuid, CheatMessage cheatMessage) {
         coverMessage coverMessage = new coverMessage();
         SocketMessage message = new SocketMessage();
-        Set<String> members = groupMemberCache.getGroupMemberIdsByGroupId(cheatMessage.getTo());
-        if (!members.contains(shelfUuid)){
+        Set<GroupMember> members = groupMemberCache.getGroupMembersByGroupId(cheatMessage.getTo());
+        boolean inGroup = false;
+        Iterator<GroupMember> it = members.iterator();
+        while (it.hasNext()){
+            GroupMember m = it.next();
+            if (m.getUserUuid().equals(shelfUuid)){
+                inGroup = true;
+                break;
+            }
+        }
+        if (!inGroup) {
             coverMessage.setSuccess(false);
             message.error().setErrorMessage("您未加入该群聊！");
             coverMessage.setMessage(message);
