@@ -3,6 +3,7 @@ package com.cinle.wowcheat.Event;
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Model.CheatMessage;
 import com.cinle.wowcheat.Model.FriendsRequest;
+import com.cinle.wowcheat.Model.Group;
 import com.cinle.wowcheat.Model.MyUserDetail;
 import com.cinle.wowcheat.Service.FriendRequestServices;
 import com.cinle.wowcheat.Service.MessageServices;
@@ -16,6 +17,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @Author JunLe
@@ -99,13 +102,17 @@ public class SendSocketMessageEventListener {
         socketMessage.setMessage(toTarget);
         messagingTemplate.convertAndSendToUser(request.getReceiverUuid(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSON(socketMessage));
 
-
     }
 
     /**
-     * 给新入群者发送更新群聊消息
+     * 给所有群成员发送更新群聊信息
      */
     private void sendUpdateGroup(SocketMessage socketMessage) {
+        Group group = (Group) socketMessage.getMessage();
+        List<String> members = group.getMemberIds();
+        for (String uuid : members){
+            messagingTemplate.convertAndSendToUser(uuid, SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSON(socketMessage));
+        }
 
     }
 
