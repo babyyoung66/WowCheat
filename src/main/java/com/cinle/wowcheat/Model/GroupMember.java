@@ -1,8 +1,11 @@
 package com.cinle.wowcheat.Model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -16,6 +19,7 @@ public class GroupMember implements Serializable {
     /**
      * 群组uuid
      */
+    @NotBlank(message = "群聊uuid不能为空！")
     private String groupUuid;
 
     /**
@@ -26,6 +30,9 @@ public class GroupMember implements Serializable {
     /**
      * 群备注
      */
+    @Length(max = 12,message = "备注长度0-12位!")
+    @Pattern(regexp = "[^<>#^\\r\\t\\n*&\\\\/$]*?",
+            message = "备注不能包含特殊符号!")
     private String remarks;
 
     /**
@@ -189,11 +196,11 @@ public class GroupMember implements Serializable {
         result = prime * result + ((getAutoId() == null) ? 0 : getAutoId().hashCode());
         result = prime * result + ((getGroupUuid() == null) ? 0 : getGroupUuid().hashCode());
         result = prime * result + ((getUserUuid() == null) ? 0 : getUserUuid().hashCode());
-        result = prime * result + ((getJoinTime() == null) ? 0 : getJoinTime().hashCode());
-        result = prime * result + ((getInviterUuid() == null) ? 0 : getInviterUuid().hashCode());
-        result = prime * result + ((getMemberRole() == null) ? 0 : getMemberRole().hashCode());
-        result = prime * result + ((getMemberStatus() == null) ? 0 : getMemberStatus().hashCode());
-        result = prime * result + ((getLastCheatTime() == null) ? 0 : getLastCheatTime().hashCode());
+//        result = prime * result + ((getInviterUuid() == null) ? 0 : getInviterUuid().hashCode());
+//        result = prime * result + ((getMemberRole() == null) ? 0 : getMemberRole().hashCode());
+//        result = prime * result + ((getMemberStatus() == null) ? 0 : getMemberStatus().hashCode());
+//        result = prime * result + ((getLastCheatTime() == null) ? 0 : getNotifyStatus().hashCode());
+
         return result;
     }
 
