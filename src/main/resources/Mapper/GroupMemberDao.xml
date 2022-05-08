@@ -148,10 +148,17 @@
   </select>
 
   <select id="getGroupMembersForSendMessage" resultMap="BaseResultMap">
-    select user_uuid,member_role, member_status,notify_status
+    select auto_id,user_uuid,member_role, member_status,notify_status
     from wow_groups_member
     where group_uuid = #{groupId}
   </select>
+
+  <select id="getGroupMemberForSendMessage" resultMap="BaseResultMap">
+    select auto_id,user_uuid,member_role, member_status,notify_status
+    from wow_groups_member
+    where group_uuid = #{groupId} and user_uuid = #{memberId}
+  </select>
+
   <select useCache="false" id="getMemberTotalByGroupId" resultType="java.lang.Integer">
     select count(user_uuid)
     from wow_groups_member
@@ -228,5 +235,17 @@
     </set>
     where group_uuid = #{groupUuid,jdbcType=VARCHAR} and user_uuid = #{userUuid,jdbcType=VARCHAR}
   </update>
+
+  <insert id="insertManySelective">
+    insert into wow_groups_member
+    (group_uuid, user_uuid, join_time, inviter_uuid)
+    values
+    <trim suffixOverrides=",">
+      <foreach collection="members" item="m"  separator="," >
+        (#{m.groupUuid},#{m.userUuid},#{m.joinTime},#{m.inviterUuid})
+      </foreach>
+    </trim>
+
+  </insert>
 
 </mapper>
