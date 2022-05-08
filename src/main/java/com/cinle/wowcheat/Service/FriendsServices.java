@@ -22,6 +22,13 @@ public interface FriendsServices {
 
     List<String> selectFriendUuidList(String sUuid);
 
+
+    /**
+     * 获取请求者多个好友的与请求者的状态信息
+     * 即好友视角，请求者的状态
+     */
+    List<Friends> selectShelfInfoByFriendIdList(String sUuid,List<String> IdList);
+
     /**
      * 带缓存的查询
      * 用于验证双方身份
