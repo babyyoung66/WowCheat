@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/")
 public class TestConnection {
-    private AjaxResponse response = new AjaxResponse().success().setMessage("服务连接正常！");
+
 
     @PostMapping("/ping")
     public AjaxResponse ping(){
+        AjaxResponse response = new AjaxResponse().success().setMessage("服务连接正常！");
         return response;
     }
 }
