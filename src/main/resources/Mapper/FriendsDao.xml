@@ -83,6 +83,16 @@
         from wow_friends
         where s_uuid = #{sUuid}
     </select>
+
+    <select useCache="false" id="selectShelfInfoByFriendIdList" resultType="com.cinle.wowcheat.Model.Friends">
+        select s_uuid,f_uuid, f_remarks,f_status,lastCheatTime
+        from wow_friends
+        where f_uuid = #{sUuid} and s_uuid in
+        <foreach collection="IdList" item="uuid" index="index" open="(" separator="," close=")">
+        #{uuid}
+        </foreach>
+    </select>
+
     <select useCache="true" id="findFriend" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"></include>
