@@ -18,13 +18,6 @@ public class ImageCompressUtils {
     private ImageCompressUtils() {
     }
 
-    public static void main(String[] args) throws UploadFileException {
-        String source = "C:\\Users\\BabyYoung\\Pictures\\XXOO.gif";
-        String target = "C:\\Users\\BabyYoung\\Pictures\\ddyy.gif";
-        //System.out.println(source.substring(source.lastIndexOf("/") + 1));
-        //DefaultCompress(source,target);
-    }
-
     public static void DefaultCompress(String source, String outPut) throws UploadFileException {
         try {
             Thumbnails.of(source)
