@@ -183,7 +183,7 @@ public class UserController {
      * @throws UploadFileException
      */
     @PostMapping("/editPhoto")
-    public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException, FileUploadException {
+    public AjaxResponse editPhoto(MultipartFile file) throws UploadFileException {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         boolean checkType = UploadUtils.checkFileType(file, FileType.image);
@@ -221,6 +221,7 @@ public class UserController {
         ApplicationEvent event = new ImagePressEvent(fileDetail);
         applicationContext.publishEvent(event);
 
+        usr.setPhotourl(fileUrl);
         response.success().setMessage("修改成功！").setData(JSON.toJSON(usr));//返回更新后的数据
         return response;
     }
@@ -234,7 +235,7 @@ public class UserController {
      * @return 返回本人新资料
      */
     @PostMapping("/editInfo")
-    public AjaxResponse editUserInfo(@RequestBody @Valid UserEditVo user) throws UploadFileException {
+    public AjaxResponse editUserInfo(@RequestBody @Valid UserEditVo user) {
         AjaxResponse response = new AjaxResponse();
         String uuid = SecurityContextUtils.getCurrentUserUUID();
         user.setUuid(uuid);
