@@ -30,13 +30,24 @@ public class GroupMemberCache {
     public Set<GroupMember> getGroupMembersByGroupId(String groupId) {
         String key = prefix_KEY_MEMBER + groupId;
         Set<GroupMember> set = redisTemplate.opsForSet().members(key);
-        return set.size() > 0 ? set : initMembers(groupId);
+        if (set.size() > 0){
+            redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
+        }else {
+            set = initMembers(groupId);
+        }
+        return set;
     }
 
     public Set<String> getGroupAdminIdsByGroupId(String groupId) {
         String key = prefix_KEY_ADMIN + groupId;
         Set<String> set = redisTemplate.opsForSet().members(key);
-        return set.size() > 0 ? set : initAdminIds(groupId);
+        if (set.size() > 0){
+            redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
+        }else {
+            set = initAdminIds(groupId);
+        }
+
+        return set;
     }
 
     public long updateGroupMembers(String groupId, List<GroupMember> groupMembers) {
@@ -50,16 +61,7 @@ public class GroupMemberCache {
         return count;
     }
 
-    public long deleteGroupMember(String groupId, List<GroupMember> groupMembers) {
-        String key = prefix_KEY_MEMBER + groupId;
-        long count = 0;
-        for (GroupMember member : groupMembers) {
-            redisTemplate.opsForSet().remove(key, member);
-            count++;
-        }
-        redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
-        return count;
-    }
+
 
     public long updateGroupAdminIds(String groupId, List<String> adminIds) {
         String key = prefix_KEY_ADMIN + groupId;
@@ -72,16 +74,7 @@ public class GroupMemberCache {
         return count;
     }
 
-    public long deleteGroupAdminIds(String groupId, List<String> adminIds) {
-        String key = prefix_KEY_ADMIN + groupId;
-        long count = 0;
-        for (String uuid : adminIds) {
-            redisTemplate.opsForSet().remove(key, uuid);
-            count++;
-        }
-        redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
-        return count;
-    }
+
 
     public void removeAllCache(String groupId){
         redisTemplate.delete(prefix_KEY_MEMBER + groupId);

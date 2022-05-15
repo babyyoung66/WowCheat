@@ -3,17 +3,18 @@ package com.cinle.wowcheat.Utils;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Enum.FileType;
 import com.cinle.wowcheat.Exception.UploadFileException;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**

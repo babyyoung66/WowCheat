@@ -65,10 +65,14 @@ public class FriendsController {
         int i = 0;
         while (it.hasNext()) {
             MyUserDetail friend = it.next();
-            //localDateTime转date
-            Timestamp time = new Timestamp(friend.getConcatInfo().getLastCheatTime().getTime());
-            long total = messageServices.getPersonalUnReadTotal(friend.getUuid(), selfUuid, time, "personal");
-            users.get(i).getConcatInfo().setUnReadTotal(total);
+            //好友关系正常时获取未读消息数
+            if (friend.getConcatInfo().getStatus() == CheatStatus.Friend_Normal.getIndex()){
+                //localDateTime转date
+                Timestamp time = new Timestamp(friend.getConcatInfo().getLastCheatTime().getTime());
+                long total = messageServices.getPersonalUnReadTotal(friend.getUuid(), selfUuid, time, "personal");
+                users.get(i).getConcatInfo().setUnReadTotal(total);
+            }
+
             i++;
         }
         AjaxResponse ajaxResponse = new AjaxResponse().success().setData(JSON.toJSON(users));

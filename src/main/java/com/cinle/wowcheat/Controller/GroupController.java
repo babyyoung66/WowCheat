@@ -64,8 +64,11 @@ public class GroupController {
             if (cheatTime != null) {
                 time = new Timestamp(cheatTime.getTime());
             }
-            long total = messageServices.getGroupUnReadTotal(uuid, g.getUuid(), time, "group");
-            groups.get(i).getConcatInfo().setUnReadTotal(total);
+            //查询没有屏蔽的群聊未读消息数
+            if ( g.getConcatInfo().getNotifyStatus() == 0){
+                long total = messageServices.getGroupUnReadTotal(uuid, g.getUuid(), time, "group");
+                groups.get(i).getConcatInfo().setUnReadTotal(total);
+            }
         }
         response.success().setData(JSON.toJSON(groups));
         return response;

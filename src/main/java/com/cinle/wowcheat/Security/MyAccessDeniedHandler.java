@@ -2,8 +2,6 @@ package com.cinle.wowcheat.Security;
 
 import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Vo.AjaxResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;

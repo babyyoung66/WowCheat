@@ -1,21 +1,15 @@
 package com.cinle.wowcheat.AOP;
 
-import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Enum.RoleEnum;
 import com.cinle.wowcheat.Utils.SecurityContextUtils;
 import com.cinle.wowcheat.Vo.AjaxResponse;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 
 /**
@@ -38,7 +32,6 @@ public class TestRoleInterceptor {
         if (authorities.contains(testRole)){
             AjaxResponse ajaxResponse = new AjaxResponse();
             ajaxResponse.error().setCode(403).setMessage("测试用户禁止修改！");
-//
             return ajaxResponse;
         }else {
             return joinPoint.proceed();

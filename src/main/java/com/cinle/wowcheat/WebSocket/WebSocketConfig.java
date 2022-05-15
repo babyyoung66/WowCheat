@@ -63,7 +63,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         //服务端发送消息给客户端的域,多个用逗号隔开
         registry.enableSimpleBroker(SocketConstants.TOPIC_SUBSCRIBE,SocketConstants.USER_SUBSCRIBE)
-                .setHeartbeatValue(new long[]{30000,30000})
+                .setHeartbeatValue(new long[]{20000,20000})
                 .setTaskScheduler(taskScheduler);
         //定义一对一推送的时候前缀，默认为/user/
         registry.setUserDestinationPrefix(SocketConstants.USER_SUBSCRIBE_Prefix);

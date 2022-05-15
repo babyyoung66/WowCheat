@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
  * 权限过滤
  * 需配置权限对应的url使用
  */
+@Deprecated
 @Component("checkRoles")
 public class RolesCheck {
 
