@@ -43,7 +43,7 @@ public class SocketConstants {
     /**
      * 限制消息长度
      */
-    public static int CONTENT_LIMIT = 200;
+    public static int CONTENT_LIMIT = 300;
 
 
     /**
