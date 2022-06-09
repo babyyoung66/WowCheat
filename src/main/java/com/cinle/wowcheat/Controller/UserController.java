@@ -200,8 +200,8 @@ public class UserController {
 
         //上传新头像
         String fileName = file.getOriginalFilename();
-        String uploadPath = FileConst.PHOTO_PATH + photoName ;
-        String fileUrl = FileConst.UPLOAD_BASE_PATH + uploadPath;
+        String uploadPath = FileConst.LOCAL_PHOTO_PATH + photoName ;
+        String fileUrl = FileConst.Photo_BASE_PATH + uploadPath;
         //真实保存地址
         String realPath = UploadUtils.uploadFile(file, uploadPath, FileType.image);
         //存入数据库

@@ -19,7 +19,17 @@ public class FileConst {
      * Nginx代理时请填写Nginx域名端口或ip端口
      */
     //public static final String UPLOAD_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
-    public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu:1288" + ACCESS_PATH;
+    //public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu:1288" + ACCESS_PATH;
+    public static final String UPLOAD_BASE_PATH = "https://www.cinle.icu" + ACCESS_PATH;
+
+
+    /**
+     * 头像另起一个url，因为www前缀的域名配置了cdn，cdn缓存30天
+     * 导致修改头像后无法刷新显示，所以这里需要区别于其他文件
+     * 让头像不走CND缓存
+     */
+    //public static final String Photo_BASE_PATH = "http://127.0.0.1:9999" + ACCESS_PATH;
+    public static final String Photo_BASE_PATH = "https://cinle.icu" + ACCESS_PATH;
 
     /**
      * 文件上传对应的本地路径
@@ -31,7 +41,10 @@ public class FileConst {
      */
     public static final String DEFAULT_PHOTO_URL = "./static/cheat.png";
 
-    public static final String PHOTO_PATH = "image/";
+    /**
+     * 上传保存的物理目录
+     */
+    public static final String LOCAL_PHOTO_PATH = "image/";
 
     /**
      * 聊天文件存放根路径

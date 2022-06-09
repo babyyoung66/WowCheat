@@ -19,6 +19,13 @@ public class WebSocketController {
     @Autowired
     SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * 发送文本消息
+     * 频繁发送则返回提示信息
+     *
+     * @param principal
+     * @param message
+     */
     @MessageMapping("/sendMessage")
     public void sendMessage(SocketUserPrincipal principal, CheatMessage message) {
         //System.out.println("message = " + message);
@@ -29,8 +36,8 @@ public class WebSocketController {
             messagingTemplate.convertAndSendToUser(principal.getName(), SocketConstants.USER_SUBSCRIBE_Suffix, JSON.toJSONString(socketMessage, true));
             return;
         }
-        message.setContentType("text");
-        socketMessageServices.sendText(principal,message);
+        //message.setContentType("text");
+        socketMessageServices.sendText(principal, message);
 
     }
 }

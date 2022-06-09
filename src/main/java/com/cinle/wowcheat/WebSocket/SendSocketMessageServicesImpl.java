@@ -4,21 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.cinle.wowcheat.Constants.FileConst;
 import com.cinle.wowcheat.Constants.MyConst;
 import com.cinle.wowcheat.Dao.UserFileDetailDao;
-import com.cinle.wowcheat.Enum.ContentType;
 import com.cinle.wowcheat.Enum.FileType;
+import com.cinle.wowcheat.Enum.MessageContentType;
 import com.cinle.wowcheat.Enum.MessageType;
 import com.cinle.wowcheat.Enum.RoleEnum;
-import com.cinle.wowcheat.Event.ImagePressEvent;
 import com.cinle.wowcheat.Exception.UploadFileException;
 import com.cinle.wowcheat.Model.*;
 import com.cinle.wowcheat.Redis.GroupMemberCache;
 import com.cinle.wowcheat.Service.FriendsServices;
 import com.cinle.wowcheat.Service.MessageServices;
 import com.cinle.wowcheat.Utils.EscapeHtmlUtils;
+import com.cinle.wowcheat.Utils.ImageCompressUtils;
 import com.cinle.wowcheat.Utils.UploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -131,7 +130,7 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         cheatMessage.setFrom(MyConst.DEFAULT_ADMIN_ID);
         cheatMessage.setTo(user.getUuid());
         cheatMessage.setTime(new Date());
-        cheatMessage.setContentType(ContentType.text.toString());
+        cheatMessage.setContentType(MessageContentType.text.toString());
         cheatMessage.setContent("欢迎注册使用WowCheat~~");
         cheatMessage.setMsgType(MessageType.personal.toString());
         message.success().setMessage(cheatMessage);
@@ -194,8 +193,14 @@ public class SendSocketMessageServicesImpl implements SendSocketMessageServices 
         fileDetailDao.insertSelective(userFileDetail);
         //非GIF图，发送图片压缩事件,
         if (!suffixName.equalsIgnoreCase(".gif")) {
-            ApplicationEvent event = new ImagePressEvent(userFileDetail);
-            applicationContext.publishEvent(event);
+            //没压缩就发送消息，会造成服务器带宽负担，所以改成同步压缩后再发送消息
+            try {
+                ImageCompressUtils.DefaultCompress(userFileDetail.getFilePath(),userFileDetail.getFilePath());
+            }catch (Exception e){
+                //TODO
+            }
+            //ApplicationEvent event = new ImagePressEvent(userFileDetail);
+            //applicationContext.publishEvent(event);
         }
 
         return message;
