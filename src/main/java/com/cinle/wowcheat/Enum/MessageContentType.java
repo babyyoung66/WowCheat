@@ -4,7 +4,7 @@ package com.cinle.wowcheat.Enum;
  * @Author JunLe
  * @Time 2022/3/3 15:23
  */
-public enum ContentType {
+public enum MessageContentType {
     text,
 
     image,
@@ -13,5 +13,7 @@ public enum ContentType {
 
     video,
 
-    sound
+    sound,
+
+    html
 }
